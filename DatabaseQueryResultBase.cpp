@@ -1,0 +1,2 @@
+#include "DatabaseQueryResultBase.h"
+

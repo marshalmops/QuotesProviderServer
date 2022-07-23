@@ -1,4 +1,5 @@
 QT -= gui
+QT += sql
 
 CONFIG += c++17 console
 CONFIG -= app_bundl
@@ -20,6 +21,9 @@ SOURCES += \
         AppInitializer.cpp \
         CoreContext.cpp \
         DatabaseContext.cpp \
+        DatabaseDriverBase.cpp \
+        DatabaseDriverSQLite.cpp \
+        DatabaseDriverStandard.cpp \
         DatabaseLayerCreator.cpp \
         DatabaseQueryBase.cpp \
         DatabaseQueryConditionBase.cpp \
@@ -29,6 +33,8 @@ SOURCES += \
         DatabaseQueryParserResultInterface.cpp \
         DatabaseQueryParserResultSQL.cpp \
         DatabaseQueryParserStandard.cpp \
+        DatabaseQueryResultBase.cpp \
+        DatabaseQueryResultStandard.cpp \
         DatabaseQueryStandard.cpp \
         DatabaseQueryStandardDelete.cpp \
         DatabaseQueryStandardInsert.cpp \
@@ -68,6 +74,9 @@ HEADERS += \
     AppInitializer.h \
     CoreContext.h \
     DatabaseContext.h \
+    DatabaseDriverBase.h \
+    DatabaseDriverSQLite.h \
+    DatabaseDriverStandard.h \
     DatabaseLayerCreator.h \
     DatabaseQueryBase.h \
     DatabaseQueryConditionBase.h \
@@ -77,6 +86,8 @@ HEADERS += \
     DatabaseQueryParserResultInterface.h \
     DatabaseQueryParserResultSQL.h \
     DatabaseQueryParserStandard.h \
+    DatabaseQueryResultBase.h \
+    DatabaseQueryResultStandard.h \
     DatabaseQueryStandard.h \
     DatabaseQueryStandardDelete.h \
     DatabaseQueryStandardInsert.h \

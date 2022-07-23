@@ -187,20 +187,18 @@ QString DatabaseQueryParserStandard::orderFlagToString(const DatabaseQueryContex
 
 QString DatabaseQueryParserStandard::variantValueToString(const QVariant &value) const
 {
-    QString result{};
-    
-    if (value.isNull()) return result;
+    if (value.isNull()) return QString{};
     
     switch (value.type()) {
     case QVariant::Type::Char:
-    case QVariant::Type::String: {result = QString{'\''} + value.toString() + '\''; break;};
+    case QVariant::Type::String: {return (QString{'\''} + value.toString() + '\'');};
     case QVariant::Type::Bool:
     case QVariant::Type::LongLong:
     case QVariant::Type::Int:
-    case QVariant::Type::Double: {result = value.toString(); break;};
+    case QVariant::Type::Double: {return value.toString();};
     }
     
-    return result;
+    return QString{};
 }
 
 QString DatabaseQueryParserStandard::conditionsListToString(const DatabaseQueryUsingCondition::ConditionsList &conditions) const
