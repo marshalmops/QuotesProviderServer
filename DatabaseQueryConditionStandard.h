@@ -18,6 +18,8 @@ public:
     const QString&  getAttributeName() const;
     const QVariant& getValue        () const;
     
+    QString toString() const;
+    
     virtual bool isValid() const override;
     
 protected:

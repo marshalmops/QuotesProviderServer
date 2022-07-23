@@ -10,25 +10,23 @@ class DatabaseQueryStandardSelect
           public DatabaseQueryUsingCondition
 {
 public:
-    using ConditionsList = DatabaseQueryUsingCondition::ConditionsList;
+    using OrderingPairsList = std::vector<std::pair<DatabaseQueryContextStandard::OrderFlag, QString>>;
+    using ConditionsList    = DatabaseQueryUsingCondition::ConditionsList;
     
     DatabaseQueryStandardSelect(const QStringList &tables,
                                 const QStringList &attributes = QStringList{},
                                 const ConditionsList &conditions = ConditionsList{},
                                 const uint32_t limit = 0,
-                                const DatabaseQueryContextStandard::OrderFlag orderFlag = DatabaseQueryContextStandard::OrderFlag::OF_NO_ORDER,
-                                const QString &orderAttribute = QString{});
+                                const OrderingPairsList &orderingPairs = OrderingPairsList{});
     
     uint32_t getLimit() const;
-    DatabaseQueryContextStandard::OrderFlag getOrder() const;
-    const QString& getOrderAttribute() const;
+    const OrderingPairsList& getOrderingPairs() const;
     
     virtual bool isValid() const override;
     
 protected:
     uint32_t m_limit;
-    DatabaseQueryContextStandard::OrderFlag m_orderFlag;
-    QString m_orderAttribute;
+    OrderingPairsList m_orderingPairs;
 };
 
 #endif // DATABASEQUERYSTANDARDSELECT_H

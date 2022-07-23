@@ -8,6 +8,10 @@
 #include "DatabaseQueryStandardUpdate.h"
 #include "DatabaseQueryStandardDelete.h"
 
+#include "DatabaseQueryConditionStandard.h"
+
+#include "DatabaseQueryParserResultSQL.h"
+
 class DatabaseQueryParserStandard : public DatabaseQueryParserInterface
 {
 public:
@@ -17,14 +21,18 @@ public:
                             std::unique_ptr<DatabaseQueryParserResultInterface> &result) override;
 
 protected:
-    bool parseSelectQuery(const DatabaseQueryStandardSelect *const query,
-                          std::unique_ptr<DatabaseQueryParserResultInterface> &result);
-    bool parseInsertQuery(const DatabaseQueryStandardInsert *const query,
-                          std::unique_ptr<DatabaseQueryParserResultInterface> &result);
-    bool parseUpdateQuery(const DatabaseQueryStandardUpdate *const query,
-                          std::unique_ptr<DatabaseQueryParserResultInterface> &result);
-    bool parseDeleteQuery(const DatabaseQueryStandardDelete *const query,
-                          std::unique_ptr<DatabaseQueryParserResultInterface> &result);
+    virtual bool parseSelectQuery(const DatabaseQueryStandardSelect *const query,
+                                  std::unique_ptr<DatabaseQueryParserResultInterface> &result);
+    virtual bool parseInsertQuery(const DatabaseQueryStandardInsert *const query,
+                                  std::unique_ptr<DatabaseQueryParserResultInterface> &result);
+    virtual bool parseUpdateQuery(const DatabaseQueryStandardUpdate *const query,
+                                  std::unique_ptr<DatabaseQueryParserResultInterface> &result);
+    virtual bool parseDeleteQuery(const DatabaseQueryStandardDelete *const query,
+                                  std::unique_ptr<DatabaseQueryParserResultInterface> &result);
+    
+    QString orderFlagToString     (const DatabaseQueryContextStandard::OrderFlag orderFlag) const;
+    QString variantValueToString  (const QVariant &value) const;
+    QString conditionsListToString(const DatabaseQueryUsingCondition::ConditionsList &conditions) const;
 };
 
 #endif // DATABASEQUERYPARSERSTANDARD_H

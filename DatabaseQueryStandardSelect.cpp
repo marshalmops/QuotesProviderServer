@@ -4,13 +4,11 @@ DatabaseQueryStandardSelect::DatabaseQueryStandardSelect(const QStringList &tabl
                                                          const QStringList &attributes, 
                                                          const ConditionsList &conditions,
                                                          const uint32_t limit,
-                                                         const DatabaseQueryContextStandard::OrderFlag orderFlag,
-                                                         const QString &orderAttribute)
+                                                         const OrderingPairsList &orderingPairs)
     : DatabaseQueryStandard{DatabaseQueryContextStandard::DatabaseQueryType::DQT_SELECT, tables, attributes},
       DatabaseQueryUsingCondition{conditions},
       m_limit{limit},
-      m_orderFlag{orderFlag},
-      m_orderAttribute{orderAttribute}
+      m_orderingPairs{orderingPairs}
 {
     
 }
@@ -20,17 +18,22 @@ uint32_t DatabaseQueryStandardSelect::getLimit() const
     return m_limit;
 }
 
-DatabaseQueryContextStandard::OrderFlag DatabaseQueryStandardSelect::getOrder() const
+const DatabaseQueryStandardSelect::OrderingPairsList &DatabaseQueryStandardSelect::getOrderingPairs() const
 {
-    return m_orderFlag;
-}
-
-const QString &DatabaseQueryStandardSelect::getOrderAttribute() const
-{
-    return m_orderAttribute;
+    return m_orderingPairs;
 }
 
 bool DatabaseQueryStandardSelect::isValid() const
 {
+    if (!m_orderingPairs.empty()) {
+        for (auto i = m_orderingPairs.begin(); i != m_orderingPairs.end(); ++i) {
+            if (i->first == DatabaseQueryContextStandard::OrderFlag::OF_NO_ORDER
+             || i->second.isEmpty())
+            {
+                return false;
+            }
+        }
+    }
+    
     return DatabaseQueryStandard::isValid();
 }

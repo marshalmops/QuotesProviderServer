@@ -14,5 +14,6 @@ DatabaseQueryStandardUpdate::DatabaseQueryStandardUpdate(const QStringList &tabl
 bool DatabaseQueryStandardUpdate::isValid() const
 {
     return (!m_attributes.isEmpty() && !m_values.empty()
+          && (m_attributes.size() == m_values.size())
           && DatabaseQueryStandard::isValid());
 }
