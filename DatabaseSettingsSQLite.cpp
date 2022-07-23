@@ -1,12 +1,29 @@
 #include "DatabaseSettingsSQLite.h"
 
-DatabaseSettingsSQLite::DatabaseSettingsSQLite(const QUrl &filename)
-    : DatabaseSettingsBase{filename}
+DatabaseSettingsSQLite::DatabaseSettingsSQLite(DatabaseSettingsBase &&settingsBase)
+    : DatabaseSettingsBase(std::move(settingsBase))
 {
     
 }
 
-DatabaseContext::DatabaseType DatabaseSettingsSQLite::getDatabaseType() const
+DatabaseSettingsSQLite::DatabaseSettingsSQLite(const QUrl &filename)
+    : DatabaseSettingsBase{filename, DatabaseContext::DatabaseType::DT_SQLITE}
 {
-    return DatabaseContext::DatabaseType::DT_SQLITE;
+    
+}
+
+//bool DatabaseSettingsSQLite::toJson(QJsonObject &json) const
+//{
+//    return DatabaseSettingsBase::toJson(json);
+//}
+
+//bool DatabaseSettingsSQLite::fromJson(const QJsonObject &json, 
+//                                      bool loadBase)
+//{
+//    return DatabaseSettingsBase::fromJson(json, loadBase);
+//}
+
+bool DatabaseSettingsSQLite::isValid() const
+{
+    return DatabaseSettingsBase::isValid();
 }

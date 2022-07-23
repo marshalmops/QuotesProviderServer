@@ -3,7 +3,9 @@
 
 #include "FilesProcessorInterface.h"
 
-#include "DatabaseSettingsBase.h"
+#include "DatabaseLayerCreator.h"
+
+#include "DatabaseSettingsContainerBase.h"
 
 class FilesProcessorSettings : public virtual FilesProcessorInterface
 {

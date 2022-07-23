@@ -20,6 +20,20 @@ SOURCES += \
         AppInitializer.cpp \
         CoreContext.cpp \
         DatabaseContext.cpp \
+        DatabaseLayerCreator.cpp \
+        DatabaseQueryBase.cpp \
+        DatabaseQueryConditionBase.cpp \
+        DatabaseQueryConditionStandard.cpp \
+        DatabaseQueryContextStandard.cpp \
+        DatabaseQueryParserResultInterface.cpp \
+        DatabaseQueryParserResultSQL.cpp \
+        DatabaseQueryStandard.cpp \
+        DatabaseQueryStandardDelete.cpp \
+        DatabaseQueryStandardInsert.cpp \
+        DatabaseQueryStandardSelect.cpp \
+        DatabaseQueryStandardUpdate.cpp \
+        DatabaseQueryUsingCondition.cpp \
+        DatabaseQueryUsingValuesList.cpp \
         DatabaseSettingsBase.cpp \
         DatabaseSettingsContainerBase.cpp \
         DatabaseSettingsContainerEditable.cpp \
@@ -52,6 +66,20 @@ HEADERS += \
     AppInitializer.h \
     CoreContext.h \
     DatabaseContext.h \
+    DatabaseLayerCreator.h \
+    DatabaseQueryBase.h \
+    DatabaseQueryConditionBase.h \
+    DatabaseQueryConditionStandard.h \
+    DatabaseQueryContextStandard.h \
+    DatabaseQueryParserResultInterface.h \
+    DatabaseQueryParserResultSQL.h \
+    DatabaseQueryStandard.h \
+    DatabaseQueryStandardDelete.h \
+    DatabaseQueryStandardInsert.h \
+    DatabaseQueryStandardSelect.h \
+    DatabaseQueryStandardUpdate.h \
+    DatabaseQueryUsingCondition.h \
+    DatabaseQueryUsingValuesList.h \
     DatabaseSettingsBase.h \
     DatabaseSettingsContainerBase.h \
     DatabaseSettingsContainerEditable.h \

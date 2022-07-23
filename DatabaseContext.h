@@ -13,6 +13,18 @@ enum DatabaseType : uint8_t {
 
 constexpr static const DatabaseType C_DEFAULT_DATABASE_TYPE = DatabaseType::DT_SQLITE;
 
+using DatabaseQueryTypeType = uint8_t;
+
+enum DatabaseQueryType : DatabaseQueryTypeType {
+    DQT_INVALID = 0
+};
+
+using DatabaseQueryConditionTypeType = uint8_t;
+
+enum DatabaseQueryConditionType : DatabaseQueryConditionTypeType {
+    DQCT_INVALID = 0
+};
+
 };
 
 #endif // DATABASECONTEXT_H
