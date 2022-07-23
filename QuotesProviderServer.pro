@@ -25,8 +25,10 @@ SOURCES += \
         DatabaseQueryConditionBase.cpp \
         DatabaseQueryConditionStandard.cpp \
         DatabaseQueryContextStandard.cpp \
+        DatabaseQueryParserInterface.cpp \
         DatabaseQueryParserResultInterface.cpp \
         DatabaseQueryParserResultSQL.cpp \
+        DatabaseQueryParserStandard.cpp \
         DatabaseQueryStandard.cpp \
         DatabaseQueryStandardDelete.cpp \
         DatabaseQueryStandardInsert.cpp \
@@ -71,8 +73,10 @@ HEADERS += \
     DatabaseQueryConditionBase.h \
     DatabaseQueryConditionStandard.h \
     DatabaseQueryContextStandard.h \
+    DatabaseQueryParserInterface.h \
     DatabaseQueryParserResultInterface.h \
     DatabaseQueryParserResultSQL.h \
+    DatabaseQueryParserStandard.h \
     DatabaseQueryStandard.h \
     DatabaseQueryStandardDelete.h \
     DatabaseQueryStandardInsert.h \

@@ -8,3 +8,8 @@ DatabaseQueryStandardInsert::DatabaseQueryStandardInsert(const QString &table,
 {
     
 }
+
+bool DatabaseQueryStandardInsert::isValid() const
+{
+    return (!m_values.empty() && DatabaseQueryStandard::isValid());
+}

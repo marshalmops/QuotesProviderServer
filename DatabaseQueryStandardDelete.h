@@ -14,6 +14,8 @@ public:
     
     DatabaseQueryStandardDelete(const QString &table,
                                 const ConditionsList &conditions = ConditionsList{});
+
+    virtual bool isValid() const override;
 };
 
 #endif // DATABASEQUERYSTANDARDDELETE_H

@@ -23,6 +23,8 @@ public:
     DatabaseQueryContextStandard::OrderFlag getOrder() const;
     const QString& getOrderAttribute() const;
     
+    virtual bool isValid() const override;
+    
 protected:
     uint32_t m_limit;
     DatabaseQueryContextStandard::OrderFlag m_orderFlag;

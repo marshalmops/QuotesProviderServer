@@ -29,3 +29,8 @@ const QString &DatabaseQueryStandardSelect::getOrderAttribute() const
 {
     return m_orderAttribute;
 }
+
+bool DatabaseQueryStandardSelect::isValid() const
+{
+    return DatabaseQueryStandard::isValid();
+}

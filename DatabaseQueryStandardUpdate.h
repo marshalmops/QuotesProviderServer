@@ -19,6 +19,8 @@ public:
                                 const QStringList &attributes,
                                 const ValuesList &values,
                                 const ConditionsList &conditions = ConditionsList{});
+
+    virtual bool isValid() const override;
 };
 
 #endif // DATABASEQUERYSTANDARDUPDATE_H

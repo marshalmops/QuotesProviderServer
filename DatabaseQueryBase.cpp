@@ -10,3 +10,8 @@ DatabaseContext::DatabaseQueryTypeType DatabaseQueryBase::getType() const
 {
     return m_type;
 }
+
+bool DatabaseQueryBase::isValid() const
+{
+    return (m_type != DatabaseContext::DatabaseQueryType::DQT_INVALID);
+}

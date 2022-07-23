@@ -8,3 +8,8 @@ DatabaseQueryStandardDelete::DatabaseQueryStandardDelete(const QString &table,
 {
     
 }
+
+bool DatabaseQueryStandardDelete::isValid() const
+{
+    return DatabaseQueryStandard::isValid();
+}

@@ -15,6 +15,8 @@ public:
     const QStringList& getAttributes() const;
     const QStringList& getTables    () const;
     
+    virtual bool isValid() const override;
+    
 protected:
     QStringList m_attributes;
     QStringList m_tables;

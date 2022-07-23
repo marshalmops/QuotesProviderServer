@@ -12,6 +12,8 @@ public:
     
     DatabaseContext::DatabaseQueryTypeType getType() const;
     
+    virtual bool isValid() const;
+    
 protected:
     DatabaseContext::DatabaseQueryTypeType m_type;
 };

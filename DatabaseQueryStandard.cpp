@@ -20,3 +20,8 @@ const QStringList &DatabaseQueryStandard::getTables() const
 {
     return m_tables;
 }
+
+bool DatabaseQueryStandard::isValid() const
+{
+    return (!m_tables.isEmpty() && DatabaseQueryBase::isValid());
+}

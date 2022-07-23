@@ -15,6 +15,8 @@ public:
     DatabaseQueryStandardInsert(const QString &table,
                                 const ValuesList &values,
                                 const QStringList &attributes = QStringList{});
+
+    virtual bool isValid() const override;
 };
 
 #endif // DATABASEQUERYSTANDARDINSERT_H

@@ -10,3 +10,9 @@ DatabaseQueryStandardUpdate::DatabaseQueryStandardUpdate(const QStringList &tabl
 {
     
 }
+
+bool DatabaseQueryStandardUpdate::isValid() const
+{
+    return (!m_attributes.isEmpty() && !m_values.empty()
+          && DatabaseQueryStandard::isValid());
+}
