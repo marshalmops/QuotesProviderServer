@@ -17,11 +17,12 @@ using Socket = boost::asio::ip::tcp::socket;
 
 enum Endpoints : EndpointId {
     E_INVALID = 0,
-    E_SIGN_UP,
+    //E_SIGN_UP,
     E_SIGN_IN,
     E_GET_DAILY_QUOTE,
     E_GET_HOURLY_QUOTE,
-    E_CREATE_QUOTE
+    E_CREATE_QUOTE,
+    E_CREATE_GRADE_FOR_QUOTE
 };
 };
 

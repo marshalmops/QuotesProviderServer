@@ -24,6 +24,10 @@ SOURCES += \
         DatabaseDriverBase.cpp \
         DatabaseDriverSQLite.cpp \
         DatabaseDriverStandard.cpp \
+        DatabaseEntityProcessorInterface.cpp \
+        DatabaseEntityProcessorSQL.cpp \
+        DatabaseFacadeBase.cpp \
+        DatabaseFacadeStandard.cpp \
         DatabaseLayerCreator.cpp \
         DatabaseQueryBase.cpp \
         DatabaseQueryConditionBase.cpp \
@@ -46,6 +50,11 @@ SOURCES += \
         DatabaseSettingsContainerBase.cpp \
         DatabaseSettingsContainerEditable.cpp \
         DatabaseSettingsSQLite.cpp \
+        EntityBase.cpp \
+        EntityGrade.cpp \
+        EntityQuote.cpp \
+        EntitySession.cpp \
+        EntityUser.cpp \
         Error.cpp \
         FilesProcessor.cpp \
         FilesProcessorGenerator.cpp \
@@ -77,6 +86,10 @@ HEADERS += \
     DatabaseDriverBase.h \
     DatabaseDriverSQLite.h \
     DatabaseDriverStandard.h \
+    DatabaseEntityProcessorInterface.h \
+    DatabaseEntityProcessorSQL.h \
+    DatabaseFacadeBase.h \
+    DatabaseFacadeStandard.h \
     DatabaseLayerCreator.h \
     DatabaseQueryBase.h \
     DatabaseQueryConditionBase.h \
@@ -99,6 +112,11 @@ HEADERS += \
     DatabaseSettingsContainerBase.h \
     DatabaseSettingsContainerEditable.h \
     DatabaseSettingsSQLite.h \
+    EntityBase.h \
+    EntityGrade.h \
+    EntityQuote.h \
+    EntitySession.h \
+    EntityUser.h \
     Error.h \
     FilesProcessor.h \
     FilesProcessorGenerator.h \

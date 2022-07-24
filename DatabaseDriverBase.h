@@ -14,8 +14,9 @@ public:
     DatabaseDriverBase(std::unique_ptr<DatabaseQueryParserInterface> &&queryParser);
     virtual ~DatabaseDriverBase() = default;
     
+    virtual bool initializeConnection() = 0;
     virtual bool executeQuery(const std::unique_ptr<DatabaseQueryBase> &query,
-                              std::vector<DatabaseQueryResultBase> &results) = 0;
+                              std::vector<std::shared_ptr<DatabaseQueryResultBase>> &results) = 0;
     
 protected:
     std::unique_ptr<DatabaseQueryParserInterface> m_queryParser;

@@ -2,10 +2,13 @@
 #define CORECONTEXT_H
 
 #include <stdint.h>
-
+#include <QString>
 
 namespace CoreContext
 {
+
+using Id   = uint64_t;
+using Hash = QString;
 
 enum TaskType : uint8_t {
     TT_INVALID = 0,
@@ -25,6 +28,12 @@ enum EntityType : uint8_t {
     ET_USER,
     ET_SESSION,
     ET_ENTITY_RIGHTS_GROUP
+};
+
+enum QuoteGrade : uint8_t {
+    QG_INVALID = 0,
+    QG_LIKE,
+    QG_DISLIKE
 };
 
 };

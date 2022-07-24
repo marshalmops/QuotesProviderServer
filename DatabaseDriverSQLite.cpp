@@ -4,15 +4,22 @@ DatabaseDriverSQLite::DatabaseDriverSQLite(const QString &connectionName,
                                            std::unique_ptr<DatabaseQueryParserStandard> &&queryParser)
     : DatabaseDriverStandard{connectionName, std::move(queryParser)}
 {
+    
+}
+
+bool DatabaseDriverSQLite::initializeConnection()
+{
     auto dbSettings = DatabaseSettingsContainerBase::getSettings();
     
-    QSqlDatabase db = QSqlDatabase::addDatabase(C_DATABASE_SQLITE_TYPE_STRING, connectionName);
+    QSqlDatabase db = QSqlDatabase::addDatabase(C_DATABASE_SQLITE_TYPE_STRING, m_connectionName);
     
     db.setDatabaseName(dbSettings->getDatabaseUrl().fileName());
+    
+    return db.open();
 }
 
 bool DatabaseDriverSQLite::executeQuery(const std::unique_ptr<DatabaseQueryBase> &query, 
-                                        std::vector<DatabaseQueryResultBase> &results)
+                                        std::vector<std::shared_ptr<DatabaseQueryResultBase>> &results)
 {
     if (!query->isValid()) return false;
     
@@ -34,12 +41,12 @@ bool DatabaseDriverSQLite::executeQuery(const std::unique_ptr<DatabaseQueryBase>
     
     if (rawResult.lastError().isValid()) return false;
     
-    std::vector<DatabaseQueryResultBase> resultsBuffer{};
+    std::vector<std::shared_ptr<DatabaseQueryResultBase>> resultsBuffer{};
     
     while (rawResult.next()) {
         if (!rawResult.isValid()) return false;
         
-        resultsBuffer.push_back(DatabaseQueryResultStandard{rawResult});
+        resultsBuffer.push_back(std::make_shared<DatabaseQueryResultStandard>(rawResult));
     }
     
     results = std::move(resultsBuffer);

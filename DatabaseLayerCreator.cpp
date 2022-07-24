@@ -16,3 +16,29 @@ bool DatabaseLayerCreator::createDatabaseSettingsUsingBase(std::unique_ptr<Datab
     
     return DatabaseSettingsContainerEditable::setSettings(std::move(databaseSettingsBase));
 }
+
+bool DatabaseLayerCreator::createDatabaseFacade(const QString &connectionName,
+                                                std::unique_ptr<DatabaseFacadeBase> &databaseFacade)
+{
+    if (connectionName.isEmpty()) return false;
+    
+    auto settings = DatabaseSettingsContainerBase::getSettings();
+    
+    if (!settings->isValid()) return false;
+    
+    switch (settings->getDatabaseType()) {
+    case DatabaseContext::DatabaseType::DT_SQLITE: {
+        std::unique_ptr queryParser{std::make_unique<DatabaseQueryParserStandard>()};
+        
+        std::unique_ptr driver         {std::make_unique<DatabaseDriverSQLite>(connectionName, std::move(queryParser))};
+        std::unique_ptr entityProcessor{std::make_unique<DatabaseEntityProcessorSQL>()};
+        
+        databaseFacade = std::make_unique<DatabaseFacadeStandard>(std::move(driver), std::move(entityProcessor));
+    
+        break;
+    }
+    default: return false;
+    }
+    
+    return true;
+}
