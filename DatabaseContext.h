@@ -5,6 +5,12 @@
 
 namespace DatabaseContext {
 
+enum DatabaseOperationResult : uint8_t {
+    DOR_ERROR = 0,
+    DOR_NOT_FOUND,
+    DOR_SUCCESS
+};
+
 enum DatabaseType : uint8_t {
     DT_INVALID = 0,
     DT_SQLITE,

@@ -17,17 +17,17 @@ public:
                        std::unique_ptr<DatabaseEntityProcessorInterface> &&entityProcessor);
     virtual ~DatabaseFacadeBase() = default;
     
-    virtual bool createUserSession  (const std::unique_ptr<EntityUser> &userData,
-                                     const std::unique_ptr<EntitySession> &sessionData,
-                                     std::unique_ptr<EntitySession> &createdSession) = 0;
-    virtual bool createQuote        (const CoreContext::Hash &token,
-                                     const std::unique_ptr<EntitySession> &quoteData,
-                                     std::unique_ptr<EntitySession> &createdQuote) = 0;
-    virtual bool getQuoteById       (const CoreContext::Id quoteId,
-                                     std::unique_ptr<EntitySession> &gottenQuote) = 0;
-    virtual bool getQuotesCount     (CoreContext::Id &quotesCount) = 0;
-    virtual bool createGradeForQuote(const std::unique_ptr<EntityGrade> &gradeData,
-                                     std::unique_ptr<EntityGrade> &createdGrade) = 0;
+    virtual DatabaseContext::DatabaseOperationResult createUserSession  (const std::unique_ptr<EntityUser> &userData,
+                                                                         const std::unique_ptr<EntitySession> &sessionData,
+                                                                         std::unique_ptr<EntitySession> &createdSession) = 0;
+    virtual DatabaseContext::DatabaseOperationResult createQuote        (const CoreContext::Hash &token,
+                                                                         const std::unique_ptr<EntityQuote> &quoteData,
+                                                                         std::unique_ptr<EntityQuote> &createdQuote) = 0;
+    virtual DatabaseContext::DatabaseOperationResult getQuoteById       (const CoreContext::Id quoteId,
+                                                                         std::unique_ptr<EntityQuote> &gottenQuote) = 0;
+    virtual DatabaseContext::DatabaseOperationResult getQuotesCount     (CoreContext::Id &quotesCount) = 0;
+    virtual DatabaseContext::DatabaseOperationResult createGradeForQuote(const std::unique_ptr<EntityGrade> &gradeData,
+                                                                         std::unique_ptr<EntityGrade> &createdGrade) = 0;
     
 protected:
     std::unique_ptr<DatabaseDriverBase>               m_driver;
