@@ -45,8 +45,10 @@ bool DatabaseSettingsBase::toJson (QJsonObject &json) const
 {
     if (!isValid()) return false;
     
-    json[C_DATABASE_TYPE_PROP_NAME] = m_dbType;
-    json[C_DATABASE_URL_PROP_NAME]  = m_dbUrl.toString(QUrl::ComponentFormattingOption::FullyEncoded);
+    QJsonObject jsonBuffer{};
+    
+    jsonBuffer[C_DATABASE_TYPE_PROP_NAME] = m_dbType;
+    jsonBuffer[C_DATABASE_URL_PROP_NAME]  = m_dbUrl.toString(QUrl::ComponentFormattingOption::FullyEncoded);
     
     if (m_additionalProps.empty())
         return !json.empty();
@@ -61,9 +63,13 @@ bool DatabaseSettingsBase::toJson (QJsonObject &json) const
     
     if (additionalPropsObj.isEmpty()) return false;
     
-    json[C_DATABASE_ADDITIONAL_PROPS_PROP_NAME] = additionalPropsObj;
+    jsonBuffer[C_DATABASE_ADDITIONAL_PROPS_PROP_NAME] = additionalPropsObj;
     
-    return !json.isEmpty();
+    if (jsonBuffer.isEmpty()) return false;
+    
+    json = std::move(jsonBuffer);
+    
+    return true;
 }
 
 bool DatabaseSettingsBase::fromJson(const QJsonObject &json)
@@ -109,7 +115,7 @@ bool DatabaseSettingsBase::fromJson(const QJsonObject &json)
     
     m_additionalProps = std::move(additionalPropsBuffer);
     
-    return true;
+    return isValid();
 }
 
 bool DatabaseSettingsBase::isValid() const

@@ -20,6 +20,8 @@ win32-g++ {
 SOURCES += \
         AppInitializer.cpp \
         CoreContext.cpp \
+        CoreEntityProcessorBase.cpp \
+        CoreSettingsBase.cpp \
         DatabaseContext.cpp \
         DatabaseDriverBase.cpp \
         DatabaseDriverSQLite.cpp \
@@ -47,8 +49,6 @@ SOURCES += \
         DatabaseQueryUsingCondition.cpp \
         DatabaseQueryUsingValuesList.cpp \
         DatabaseSettingsBase.cpp \
-        DatabaseSettingsContainerBase.cpp \
-        DatabaseSettingsContainerEditable.cpp \
         DatabaseSettingsSQLite.cpp \
         EntityBase.cpp \
         EntityGrade.cpp \
@@ -69,8 +69,15 @@ SOURCES += \
         Server.cpp \
         ServerConnection.cpp \
         ServerWorker.cpp \
+        SessionTokenGenerator.cpp \
+        SettingsContainerBase.cpp \
+        SettingsContainerEditable.cpp \
+        SettingsInterface.cpp \
         SlotArrayItem.cpp \
         SlotsArray.cpp \
+        TaskBase.cpp \
+        TaskCore.cpp \
+        TaskNetwork.cpp \
         ThreadedQueue.cpp \
         main.cpp
 
@@ -82,6 +89,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     AppInitializer.h \
     CoreContext.h \
+    CoreEntityProcessorBase.h \
+    CoreSettingsBase.h \
     DatabaseContext.h \
     DatabaseDriverBase.h \
     DatabaseDriverSQLite.h \
@@ -109,8 +118,6 @@ HEADERS += \
     DatabaseQueryUsingCondition.h \
     DatabaseQueryUsingValuesList.h \
     DatabaseSettingsBase.h \
-    DatabaseSettingsContainerBase.h \
-    DatabaseSettingsContainerEditable.h \
     DatabaseSettingsSQLite.h \
     EntityBase.h \
     EntityGrade.h \
@@ -132,6 +139,13 @@ HEADERS += \
     ServerConnection.h \
     ServerContext.h \
     ServerWorker.h \
+    SessionTokenGenerator.h \
+    SettingsContainerBase.h \
+    SettingsContainerEditable.h \
+    SettingsInterface.h \
     SlotArrayItem.h \
     SlotsArray.h \
+    TaskBase.h \
+    TaskCore.h \
+    TaskNetwork.h \
     ThreadedQueue.h

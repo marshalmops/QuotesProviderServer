@@ -17,6 +17,16 @@ EntityQuote::EntityQuote(const QString &text,
     
 }
 
+EntityQuote &EntityQuote::operator=(EntityQuote &&quote)
+{
+    m_id               = quote.m_id;
+    m_text             = std::move(quote.m_text);
+    m_author           = std::move(quote.m_author);
+    m_rating           = quote.m_rating;
+    m_creatorId        = quote.m_creatorId;
+    m_creationDateTime = std::move(quote.m_creationDateTime);
+}
+
 CoreContext::Id EntityQuote::getId() const
 {
     return m_id;

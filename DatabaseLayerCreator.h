@@ -1,7 +1,7 @@
 #ifndef DATABASELAYERCREATOR_H
 #define DATABASELAYERCREATOR_H
 
-#include "DatabaseSettingsContainerEditable.h"
+#include "SettingsContainerEditable.h"
 
 #include "DatabaseSettingsSQLite.h"
 

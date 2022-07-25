@@ -18,7 +18,8 @@ enum TaskType : uint8_t {
 
 enum CoreTaskType : uint8_t {
     CTT_INVALID = 0,
-    CTT_GET_RANDOM_QUOTE
+    CTT_GET_DAILY_QUOTE,
+    CTT_GET_HOURLY_QUOTE
 };
 
 enum EntityType : uint8_t {

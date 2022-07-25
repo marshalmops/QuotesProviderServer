@@ -10,7 +10,9 @@
 
 #include "DatabaseContext.h"
 
-class DatabaseSettingsBase
+#include "SettingsInterface.h"
+
+class DatabaseSettingsBase : public SettingsInterface
 {
 public:
     constexpr static const char* C_DEFAULT_DATABASE_SETTINGS_FILENAME = "dbSettings.json";
@@ -33,10 +35,10 @@ public:
     const QUrl&               getDatabaseUrl    () const;
     const AdditionalPropsMap& getAdditionalProps() const;
     
-    bool toJson  (QJsonObject &json) const;
-    bool fromJson(const QJsonObject &json);
+    virtual bool toJson  (QJsonObject &json) const override;
+    virtual bool fromJson(const QJsonObject &json) override;
     
-    virtual bool isValid() const;
+    virtual bool isValid() const override;
     
 protected:
     bool isBaseSet() const;

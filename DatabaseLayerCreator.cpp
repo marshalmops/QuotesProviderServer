@@ -14,7 +14,7 @@ bool DatabaseLayerCreator::createDatabaseSettingsUsingBase(std::unique_ptr<Datab
     default: return false;
     }
     
-    return DatabaseSettingsContainerEditable::setSettings(std::move(databaseSettingsBase));
+    return SettingsContainerEditable::setDatabaseSettings(std::move(databaseSettingsBase));
 }
 
 bool DatabaseLayerCreator::createDatabaseFacade(const QString &connectionName,
@@ -22,7 +22,7 @@ bool DatabaseLayerCreator::createDatabaseFacade(const QString &connectionName,
 {
     if (connectionName.isEmpty()) return false;
     
-    auto settings = DatabaseSettingsContainerBase::getSettings();
+    auto settings = SettingsContainerBase::getDatabaseSettings();
     
     if (!settings->isValid()) return false;
     

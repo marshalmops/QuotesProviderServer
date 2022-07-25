@@ -9,7 +9,7 @@ DatabaseDriverSQLite::DatabaseDriverSQLite(const QString &connectionName,
 
 bool DatabaseDriverSQLite::initializeConnection()
 {
-    auto dbSettings = DatabaseSettingsContainerBase::getSettings();
+    auto dbSettings = SettingsContainerBase::getSettings();
     
     QSqlDatabase db = QSqlDatabase::addDatabase(C_DATABASE_SQLITE_TYPE_STRING, m_connectionName);
     

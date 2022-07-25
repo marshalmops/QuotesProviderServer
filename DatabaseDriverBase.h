@@ -3,7 +3,7 @@
 
 #include "DatabaseQueryParserInterface.h"
 
-#include "DatabaseSettingsContainerBase.h"
+#include "SettingsContainerBase.h"
 
 #include "DatabaseQueryBase.h"
 #include "DatabaseQueryResultBase.h"
