@@ -25,6 +25,7 @@ public:
                 const CoreContext::Id creatorId = 0,
                 const CoreContext::Id id = 0,
                 const Rating rating = 0);
+    EntityQuote(const EntityQuote &quote);
     EntityQuote& operator=(EntityQuote &&quote);
     
     CoreContext::Id  getId              () const;

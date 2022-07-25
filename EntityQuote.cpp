@@ -17,8 +17,20 @@ EntityQuote::EntityQuote(const QString &text,
     
 }
 
+EntityQuote::EntityQuote(const EntityQuote &quote)
+    : EntityBase{quote.m_type}
+{
+    m_id               = quote.m_id;
+    m_text             = quote.m_text;
+    m_author           = quote.m_author;
+    m_rating           = quote.m_rating;
+    m_creatorId        = quote.m_creatorId;
+    m_creationDateTime = quote.m_creationDateTime;
+}
+
 EntityQuote &EntityQuote::operator=(EntityQuote &&quote)
 {
+    m_type             = quote.m_type;
     m_id               = quote.m_id;
     m_text             = std::move(quote.m_text);
     m_author           = std::move(quote.m_author);
