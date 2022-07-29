@@ -7,7 +7,9 @@
 class SettingsInterface
 {
 public:
-    SettingsInterface         () = default;
+    SettingsInterface()                          = default;
+    SettingsInterface(SettingsInterface &&other) = default;
+            
     virtual ~SettingsInterface() = default; 
     
     virtual bool toJson  (QJsonObject &json) const = 0;

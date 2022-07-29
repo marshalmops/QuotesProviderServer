@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 #include <QString>
+#include <QVector>
+#include <QCryptographicHash>
 
 namespace CoreContext
 {
@@ -31,10 +33,17 @@ enum EntityType : uint8_t {
     ET_ENTITY_RIGHTS_GROUP
 };
 
-enum QuoteGrade : uint8_t {
+enum QuoteGrade : int8_t {
+    QG_LIKE = -1,
     QG_INVALID = 0,
-    QG_LIKE,
-    QG_DISLIKE
+    QG_DISLIKE = 1
+};
+
+static const QVector<std::pair<QString, QCryptographicHash::Algorithm>> stringHashingAlgoVector = {
+    {"SHA256",    QCryptographicHash::Algorithm::Sha256},
+    {"SHA512",    QCryptographicHash::Algorithm::Sha512},
+    {"MD5",       QCryptographicHash::Algorithm::Md5},
+    {"KECCAK256", QCryptographicHash::Algorithm::Keccak_256}
 };
 
 };

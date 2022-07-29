@@ -1,2 +1,0 @@
-#include "FilesProcessorInterface.h"
-

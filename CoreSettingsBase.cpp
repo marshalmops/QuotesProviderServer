@@ -1,9 +1,9 @@
 #include "CoreSettingsBase.h"
 
-CoreSettingsBase::CoreSettingsBase()
-    : m_hashingSalt{},
-      m_hashingAlgo{},
-      m_tokenExpirationTime{0}
+CoreSettingsBase::CoreSettingsBase(CoreSettingsBase &&other)
+    : m_hashingSalt{std::move(other.m_hashingSalt)},
+      m_hashingAlgo{other.m_hashingAlgo},
+      m_tokenExpirationTime{other.m_tokenExpirationTime}
 {
     
 }

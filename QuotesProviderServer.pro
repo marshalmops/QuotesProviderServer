@@ -1,5 +1,6 @@
-QT -= gui
-QT += sql
+QT += core gui sql
+
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++17 console
 CONFIG -= app_bundl
@@ -7,7 +8,7 @@ CONFIG -= app_bundl
 win32-g++ {
     INCLUDEPATH += C:\boost_1_66_0\boost_mingw_810\include\boost-1_66
     INCLUDEPATH += C:\Qt\Tools\OpenSSL\Win_x64\include
-    LIBS += -LC:\boost_1_66_0\boost_mingw_810\lib -llibboost_system-mgw81-mt-x64-1_66
+    LIBS += -LC:\boost_1_66_0\boost_mingw_810\lib -llibboost_system-mgw81-mt-x64-1_66 -lwsock32
     LIBS += -LC:\Qt\Tools\OpenSSL\Win_x64\lib -llibcrypto -llibssl
 
     LIBS += -lws2_32
@@ -19,6 +20,7 @@ win32-g++ {
 
 SOURCES += \
         AppInitializer.cpp \
+        AppView.cpp \
         CoreContext.cpp \
         CoreEntityProcessorBase.cpp \
         CoreSettingsBase.cpp \
@@ -57,8 +59,6 @@ SOURCES += \
         EntityUser.cpp \
         Error.cpp \
         FilesProcessor.cpp \
-        FilesProcessorGenerator.cpp \
-        FilesProcessorInterface.cpp \
         FilesProcessorSettings.cpp \
         MainCore.cpp \
         MainCoreWorker.cpp \
@@ -72,9 +72,13 @@ SOURCES += \
         SessionTokenGenerator.cpp \
         SettingsContainerBase.cpp \
         SettingsContainerEditable.cpp \
+        SettingsEditor.cpp \
         SettingsInterface.cpp \
         SlotArrayItem.cpp \
         SlotsArray.cpp \
+        StringVariantMapModel.cpp \
+        StringVariantMapWidget.cpp \
+        StringVariantPairInputDialog.cpp \
         TaskBase.cpp \
         TaskCore.cpp \
         TaskNetwork.cpp \
@@ -88,6 +92,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     AppInitializer.h \
+    AppView.h \
     CoreContext.h \
     CoreEntityProcessorBase.h \
     CoreSettingsBase.h \
@@ -126,8 +131,6 @@ HEADERS += \
     EntityUser.h \
     Error.h \
     FilesProcessor.h \
-    FilesProcessorGenerator.h \
-    FilesProcessorInterface.h \
     FilesProcessorSettings.h \
     MainCore.h \
     MainCoreWorker.h \
@@ -142,9 +145,13 @@ HEADERS += \
     SessionTokenGenerator.h \
     SettingsContainerBase.h \
     SettingsContainerEditable.h \
+    SettingsEditor.h \
     SettingsInterface.h \
     SlotArrayItem.h \
     SlotsArray.h \
+    StringVariantMapModel.h \
+    StringVariantMapWidget.h \
+    StringVariantPairInputDialog.h \
     TaskBase.h \
     TaskCore.h \
     TaskNetwork.h \

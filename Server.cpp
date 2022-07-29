@@ -1,7 +1,6 @@
 #include "Server.h"
 
-Server::Server(const std::string &ipString,
-               const const ServerContext::Port port,
+Server::Server(const ServerContext::Port port,
                QObject *parent)
     : QObject{parent},
       m_ioContext{},
@@ -9,7 +8,7 @@ Server::Server(const std::string &ipString,
       m_networkStopCounter{},
       m_isRunning{false}
 {
-    ip::tcp::endpoint endpoint{ip::make_address(ipString), port};
+    ip::tcp::endpoint endpoint{ip::tcp::endpoint::protocol_type::v4(), port};
     
     m_acceptor.open(endpoint.protocol());
     m_acceptor.set_option(ip::tcp::acceptor::reuse_address(true));
@@ -53,10 +52,11 @@ void Server::launchWorkers(const uint16_t workersCount)
         
         connect(newThread, &QThread::started, newWorker.get(), &ServerWorker::start);
         
-        connect(newWorker.get(), &ServerWorker::errorOccured,   this, &Server::processError,      Qt::QueuedConnection);
+        connect(newWorker.get(), &ServerWorker::errorOccured,   this, &Server::errorOccured,      Qt::QueuedConnection);
         connect(newWorker.get(), &ServerWorker::stopped,        this, &Server::processWorkerStop, Qt::QueuedConnection);
         connect(newWorker.get(), &ServerWorker::requestOccured, this, &Server::passRequestToCore, Qt::QueuedConnection);
         
+        m_serverWorkers.push_back(newWorker);
         newThread->start();
     }
 }
@@ -65,11 +65,6 @@ void Server::stop()
 {
     for (auto i = m_serverWorkers.begin(); i != m_serverWorkers.end(); ++i)
         (*i)->stop();
-}
-
-void Server::processError(const Error error)
-{
-    emit errorOccured(error);
 }
 
 void Server::processWorkerStop()
@@ -106,5 +101,11 @@ void Server::passRequestToCore(std::shared_ptr<NetworkContentRequest> request)
 
 void Server::passResponseToWorker(std::shared_ptr<NetworkContentResponse> response)
 {
+    if (m_serverWorkers.size() <= response->getWorkerId()) {
+        emit errorOccured(Error{tr("Response processing worker id is incorrect!").toStdString(), true});
+        
+        return;
+    }
     
+    m_serverWorkers.at(response->getWorkerId())->processResponse(response);
 }

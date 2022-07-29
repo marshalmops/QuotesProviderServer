@@ -14,11 +14,11 @@ public:
     
     }
     
-    void pushItem(T&& item)
+    void pushItem(std::unique_ptr<T> &&item)
     {
         std::lock_guard<std::mutex> lock(m_backMutex);
     
-        m_items.push(item);
+        m_items.push(item.release());
     }
     
     std::unique_ptr<T> takeItem()
@@ -27,7 +27,7 @@ public:
     
         if (m_items.empty()) return std::unique_ptr<T>(nullptr);
     
-        auto elemToGive = std::make_unique<T>(std::move(m_items.front()));
+        auto elemToGive = std::unique_ptr<T>(m_items.front());
     
         m_items.pop();
     
@@ -39,7 +39,7 @@ private:
     std::mutex m_frontMutex;
     std::mutex m_backMutex;
 
-    std::queue<T> m_items;
+    std::queue<T*> m_items;
 };
 
 #endif // THREADEDQUEUE_H

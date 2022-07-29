@@ -96,8 +96,6 @@ void ServerWorker::acceptConnectionAsync()
             
                 return;
             }
-                
-            // converting readData to Request...
             
             std::shared_ptr<NetworkContentRequest> newRequest = std::make_shared<NetworkContentRequest>(m_workerId, newConnectionPtr->getIndex());
             
@@ -116,7 +114,7 @@ void ServerWorker::acceptConnectionAsync()
 
 void ServerWorker::processResponse(std::shared_ptr<NetworkContentResponse> &response)
 {
-    m_responsesQueue.pushItem(std::move(*(response.get())));
+    m_responsesQueue.pushItem(std::make_unique<NetworkContentResponse>(std::move(*(response.get()))));
     
     response.reset();
 }

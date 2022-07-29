@@ -17,6 +17,7 @@ public:
     using Buffer  = streambuf;
     
     ServerConnection() = delete;
+    ServerConnection(ServerConnection &&other);
     ServerConnection(Socket &&socket);
     
     // reading and writing using buffer...

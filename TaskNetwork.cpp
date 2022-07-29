@@ -11,3 +11,10 @@ const std::shared_ptr<NetworkContentRequest> &TaskNetwork::getRequest() const
 {
     return m_request;
 }
+
+bool TaskNetwork::isValid()
+{
+    if (!m_request.get()) return false;
+    
+    return (m_request->isValid() && TaskBase::isValid());
+}

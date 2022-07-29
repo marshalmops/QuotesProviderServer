@@ -17,3 +17,8 @@ bool Error::isCritical() const
 {
     return m_isCritical;
 }
+
+bool Error::isValid() const
+{
+    return !m_text.empty();
+}

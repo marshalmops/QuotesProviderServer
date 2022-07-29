@@ -85,22 +85,11 @@ DatabaseContext::DatabaseOperationResult DatabaseFacadeStandard::createUserSessi
     return DatabaseContext::DatabaseOperationResult::DOR_SUCCESS;
 }
 
-DatabaseContext::DatabaseOperationResult DatabaseFacadeStandard::createQuote(const CoreContext::Hash &token, 
+DatabaseContext::DatabaseOperationResult DatabaseFacadeStandard::createQuote(const std::unique_ptr<EntitySession> &session, 
                                                                              const std::unique_ptr<EntityQuote> &quoteData,
                                                                              std::unique_ptr<EntityQuote> &createdQuote)
 {
-    if (token.isEmpty() || !quoteData->isValid()) 
-        return DatabaseContext::DatabaseOperationResult::DOR_ERROR;
-    
-    // selecting session by token...
-    
-    DatabaseContext::DatabaseOperationResult sessionGettingOperationResult{};
-    std::unique_ptr<EntitySession> session{};
-    
-    if ((sessionGettingOperationResult = getSessionByToken(token, session)) != DatabaseContext::DatabaseOperationResult::DOR_SUCCESS)
-        return sessionGettingOperationResult;
-    
-    if (!session->isValid()) 
+    if (!session->isValid() || !quoteData->isValid()) 
         return DatabaseContext::DatabaseOperationResult::DOR_ERROR;
     
     // selecting user by userId...
@@ -277,6 +266,15 @@ DatabaseContext::DatabaseOperationResult DatabaseFacadeStandard::createGradeForQ
               : selectingGradeOperationResult);
     }
     
+    std::unique_ptr<EntityQuote> selectedQuote{};
+    
+    if ((selectingGradeOperationResult = getQuoteById(gradeData->getQuoteId(), selectedQuote)) != DatabaseContext::DatabaseOperationResult::DOR_SUCCESS)
+        return selectingGradeOperationResult;
+    if (!selectedQuote.get()) 
+        return DatabaseContext::DatabaseOperationResult::DOR_ERROR;
+    if (!selectedQuote->isValid())
+        return DatabaseContext::DatabaseOperationResult::DOR_ERROR;
+    
     QStringList insertingGradeAttributes{EntityGrade::C_QUOTE_ID_PROP_NAME, 
                                          EntityGrade::C_DEVICE_HASH_PROP_NAME,
                                          EntityGrade::C_GRADE_PROP_NAME};
@@ -296,6 +294,22 @@ DatabaseContext::DatabaseOperationResult DatabaseFacadeStandard::createGradeForQ
     
     if ((selectingGradeOperationResult = getGradeByQuoteIdAndDeviceHash(gradeData->getQuoteId(), gradeData->getDeviceHash(), selectedGrade)) != DatabaseContext::DatabaseOperationResult::DOR_SUCCESS)
         return selectingGradeOperationResult;
+    
+    QStringList                             updateAttributes{EntityQuote::C_RATING_PROP_NAME};
+    DatabaseQueryStandardUpdate::ValuesList updateValues    {selectedQuote->getRating() + gradeData->getGrade()};
+    auto                                    updateCondition = std::make_shared<DatabaseQueryConditionStandard>(DatabaseQueryContextStandard::DatabaseQueryConditionType::DQCT_EQUAL_TO,
+                                                                                                               EntityGrade::C_QUOTE_ID_PROP_NAME,
+                                                                                                               gradeData->getQuoteId());
+    
+    std::unique_ptr<DatabaseQueryBase> updateQuoteRatingQuery{std::make_unique<DatabaseQueryStandardUpdate>(QStringList{EntityQuote::C_QUOTE_TABLE_NAME},
+                                                                                                            updateAttributes,
+                                                                                                            updateValues,
+                                                                                                            DatabaseQueryStandardUpdate::ConditionsList{updateCondition})};
+    
+    std::vector<std::shared_ptr<DatabaseQueryResultBase>> updateResults{};
+    
+    if (!m_driver->executeQuery(updateQuoteRatingQuery, updateResults))
+        return DatabaseContext::DatabaseOperationResult::DOR_ERROR;
     
     createdGrade = std::move(selectedGrade);
     
@@ -336,6 +350,24 @@ DatabaseContext::DatabaseOperationResult DatabaseFacadeStandard::getSessionByTok
         return DatabaseContext::DatabaseOperationResult::DOR_ERROR;
     
     gottenSession = std::make_unique<EntitySession>(std::move(*curSession));
+    
+    return DatabaseContext::DatabaseOperationResult::DOR_SUCCESS;
+}
+
+DatabaseContext::DatabaseOperationResult DatabaseFacadeStandard::removeSessionByToken(const CoreContext::Hash &token)
+{
+    if (token.isEmpty())
+        return DatabaseContext::DatabaseOperationResult::DOR_ERROR;
+    
+    auto selectingGradeByQuoteIdCondition = std::make_shared<DatabaseQueryConditionStandard>(DatabaseQueryContextStandard::DatabaseQueryConditionType::DQCT_EQUAL_TO, EntitySession::C_TOKEN_PROP_NAME, token);
+    
+    std::unique_ptr<DatabaseQueryBase> deleteSessionQuery{std::make_unique<DatabaseQueryStandardDelete>(EntitySession::C_SESSION_TABLE_NAME,
+                                                                                                        DatabaseQueryStandardDelete::ConditionsList{selectingGradeByQuoteIdCondition})};
+    
+    std::vector<std::shared_ptr<DatabaseQueryResultBase>> deleteSessionQueryResults{};
+    
+    if (!m_driver->executeQuery(deleteSessionQuery, deleteSessionQueryResults))
+        return DatabaseContext::DatabaseOperationResult::DOR_ERROR;
     
     return DatabaseContext::DatabaseOperationResult::DOR_SUCCESS;
 }

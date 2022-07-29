@@ -8,12 +8,13 @@ class Error
 public:
     using String = std::string;
     
-    Error() = delete;
-    Error(const String &text,
+    Error(const String &text = String{},
           const bool isCritical = false);
     
     const String& getText   () const;
     bool          isCritical() const;
+    
+    bool isValid() const;
     
 private:
     String m_text;

@@ -10,3 +10,8 @@ CoreContext::TaskType TaskBase::getTaskType() const
 {
     return m_taskType;
 }
+
+bool TaskBase::isValid()
+{
+    return (m_taskType != CoreContext::TaskType::TT_INVALID);
+}

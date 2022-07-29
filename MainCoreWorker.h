@@ -29,7 +29,7 @@ class MainCoreWorker : public QObject
 {
     Q_OBJECT
 public:
-    explicit MainCoreWorker(const uint32_t workerId,
+    explicit MainCoreWorker(const CoreContext::Id workerId,
                             const std::shared_ptr<ThreadedQueue<TaskBase>> &tasksQueuePtr,
                             const std::shared_ptr<EntityQuote> &hourlyQuote,
                             const std::shared_ptr<EntityQuote> &dailyQuote,
@@ -46,6 +46,9 @@ public slots:
     void start();
     void stop();
     
+    void pause  ();
+    void unpause();
+    
     void recreateDatabaseFacade();
     
 private:
@@ -58,6 +61,8 @@ private:
     bool processGettingHourlyQuote(const std::shared_ptr<NetworkContentRequest> &request);
     bool processGettingDailyQuote (const std::shared_ptr<NetworkContentRequest> &request);
     
+    bool checkSessionValidity(const std::unique_ptr<EntitySession> &session);
+    
     bool generateTimeRelatedQuoteGettingResponse(const std::shared_ptr<NetworkContentRequest> &request,
                                                  const ServerContext::Endpoints timeRelatedQuoteEndpoint,
                                                  std::shared_ptr<NetworkContentResponse> &response);
@@ -67,8 +72,12 @@ private:
     
     bool getRandomQuote(std::unique_ptr<EntityQuote> &quote);
     
-    bool getSessionTokenByJson(const QJsonObject &json,
-                               CoreContext::Hash &token);
+    bool processNoTimeRelatedQuotesCase(const std::shared_ptr<NetworkContentRequest> &request,
+                                        std::shared_ptr<NetworkContentResponse> &response);
+    
+    void sendResponseByOperationCode(const DatabaseContext::DatabaseOperationResult result,
+                                     const std::shared_ptr<NetworkContentRequest> &request,
+                                     const QJsonObject &jsonBody = QJsonObject{});
     
 private:
     std::shared_ptr<EntityQuote> m_hourlyQuote;
@@ -79,8 +88,9 @@ private:
     
     std::shared_ptr<ThreadedQueue<TaskBase>> m_tasksQueuePtr;
     
-    uint32_t m_workerId;
-    bool     m_isRunning;
+    CoreContext::Id m_workerId;
+    bool            m_isRunning;
+    bool            m_isOnPause;
 };
 
 #endif // MAINCOREWORKER_H

@@ -10,6 +10,8 @@ public:
     
     CoreContext::CoreTaskType getCoreTaskType() const;
     
+    virtual bool isValid() override;
+    
 protected:
     CoreContext::CoreTaskType m_coreTaskType;
 };

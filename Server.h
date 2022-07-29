@@ -22,8 +22,9 @@ class Server : public QObject
 {
     Q_OBJECT
 public:
-    explicit Server(const std::string &ipString,
-                    const ServerContext::Port port,
+    constexpr static const uint16_t C_DEFAULT_PORT = 25999;
+    
+    explicit Server(const ServerContext::Port port = C_DEFAULT_PORT,
                     QObject *parent = nullptr);
     
     void start(const uint16_t workersCount);
@@ -33,6 +34,8 @@ protected:
     void launchWorkers(const uint16_t workersCount);
 
 signals:
+    // to MainCore:
+    
     void errorOccured(const Error error);
     void networkStopped();
     
@@ -41,7 +44,6 @@ signals:
 public slots:
     void stop();
     
-    void processError(const Error error);
     void processWorkerStop();
     
     void passRequestToCore   (std::shared_ptr<NetworkContentRequest> request);

@@ -14,11 +14,15 @@ public:
     constexpr static const char* C_CORE_HASHING_ALGO_PROP_NAME          = "hashing_algo";
     constexpr static const char* C_CORE_TOKEN_EXPIRATION_TIME_PROP_NAME = "token_expiration_time";
     
+    constexpr static const char*                         C_DEFAULT_HASHING_SALT          = "someSalt";
+    constexpr static const QCryptographicHash::Algorithm C_DEFAULT_HASHING_ALGO          = QCryptographicHash::Algorithm::Sha256;
+    constexpr static const uint32_t                      C_DEFAULT_TOKEN_EXPIRATION_TIME = 86400;
+    
 public:
-    CoreSettingsBase();
-    CoreSettingsBase(const QString& hashingSalt,
-                     const QCryptographicHash::Algorithm hashingAlgo,
-                     const uint32_t tokenExpirationTime);
+    CoreSettingsBase(CoreSettingsBase &&other);
+    CoreSettingsBase(const QString& hashingSalt = C_DEFAULT_HASHING_SALT,
+                     const QCryptographicHash::Algorithm hashingAlgo = C_DEFAULT_HASHING_ALGO,
+                     const uint32_t tokenExpirationTime = C_DEFAULT_TOKEN_EXPIRATION_TIME);
     
     const QString&                getHashingSalt        () const;
     QCryptographicHash::Algorithm getHashingAlgo        () const;

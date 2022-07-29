@@ -38,7 +38,7 @@ bool DatabaseEntityProcessorSQL::getEntityGradeByDatabaseQueryResult(const std::
     if (!isConvOK) return false;
     
     CoreContext::Hash deviceHash{deviceHashRawValue.toString()};
-    CoreContext::QuoteGrade grade{static_cast<CoreContext::QuoteGrade>(gradeRawValue.toUInt(&isConvOK))};
+    CoreContext::QuoteGrade grade{static_cast<CoreContext::QuoteGrade>(gradeRawValue.toInt(&isConvOK))};
     
     if (!isConvOK || deviceHash.isEmpty()) return false;
     
@@ -171,7 +171,7 @@ bool DatabaseEntityProcessorSQL::getEntityQuoteByDatabaseQueryResult(const std::
     
     if (!creationDateTime.isValid()) return false;
     
-    auto newQuote = std::make_shared<EntityQuote>(text, author, creatorId, creationDateTime, id, rating);
+    auto newQuote = std::make_shared<EntityQuote>(text, author, creationDateTime, creatorId, id, rating);
     
     if (!newQuote->isValid()) return false;
     

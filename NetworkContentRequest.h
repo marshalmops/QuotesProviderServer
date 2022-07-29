@@ -9,7 +9,7 @@ public:
     NetworkContentRequest() = delete;
     NetworkContentRequest(const ServerContext::WorkerId workerId,
                           const ServerContext::SocketId socketId,
-                          const ServerContext::EndpointId endpointId,
+                          const ServerContext::EndpointId endpointId = ServerContext::Endpoints::E_INVALID,
                           const QJsonObject &jsonBody = QJsonObject());
     
     ServerContext::EndpointId getEndpointId() const;

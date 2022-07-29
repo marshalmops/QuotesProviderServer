@@ -11,3 +11,9 @@ CoreContext::CoreTaskType TaskCore::getCoreTaskType() const
 {
     return m_coreTaskType;
 }
+
+bool TaskCore::isValid()
+{
+    return (m_coreTaskType != CoreContext::CoreTaskType::CTT_INVALID
+         && TaskBase::isValid());
+}

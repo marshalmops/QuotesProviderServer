@@ -7,6 +7,13 @@ ServerConnection::ServerConnection(Socket &&socket)
     
 }
 
+ServerConnection::ServerConnection(ServerConnection &&other)
+    : m_socket{std::move(other.m_socket)},
+      m_buffer{}
+{
+    
+}
+
 bool ServerConnection::readData(ServerContext::RawData &readData)
 {
     if (!m_socket.is_open()) return false;

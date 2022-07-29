@@ -9,7 +9,7 @@
 class DatabaseQueryParserInterface
 {
 public:
-    DatabaseQueryParserInterface() = default;
+    DatabaseQueryParserInterface         () = default;
     virtual ~DatabaseQueryParserInterface() = default;
     
     virtual bool parseQuery(const std::unique_ptr<DatabaseQueryBase> &query,

@@ -12,6 +12,8 @@ public:
     
     const std::shared_ptr<NetworkContentRequest>& getRequest() const;
     
+    virtual bool isValid() override;
+    
 protected:
     std::shared_ptr<NetworkContentRequest> m_request;
 };

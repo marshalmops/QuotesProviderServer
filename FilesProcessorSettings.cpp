@@ -1,10 +1,5 @@
 #include "FilesProcessorSettings.h"
 
-FilesProcessorSettings::FilesProcessorSettings()
-{
-    
-}
-
 bool FilesProcessorSettings::saveSettings()
 {
     return (saveSettingsWithFileName(DatabaseSettingsBase::C_DEFAULT_DATABASE_SETTINGS_FILENAME, SettingsContainerBase::getDatabaseSettings())

@@ -11,6 +11,8 @@ public:
     
     CoreContext::TaskType getTaskType() const;
     
+    virtual bool isValid();
+    
 protected:
     CoreContext::TaskType m_taskType;
 };

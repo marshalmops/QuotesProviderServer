@@ -11,9 +11,27 @@ CoreContext::Id getRandomId(const CoreContext::Id max) {
     return dist(rng);
 }
 
+bool getSessionTokenByJson(const QJsonObject &json,
+                           CoreContext::Hash &token)
+{
+    if (json.isEmpty()) return false;
+    if (!json.contains(EntitySession::C_TOKEN_PROP_NAME))
+        return false;
+    if (!json[EntitySession::C_TOKEN_PROP_NAME].isString())
+        return false;
+    
+    CoreContext::Hash tokenBuffer{json[EntitySession::C_TOKEN_PROP_NAME].toString()};
+    
+    if (tokenBuffer.isEmpty()) return false;
+    
+    token = std::move(tokenBuffer);
+    
+    return true;
 }
 
-MainCoreWorker::MainCoreWorker(const uint32_t workerId,
+}
+
+MainCoreWorker::MainCoreWorker(const CoreContext::Id workerId,
                                const std::shared_ptr<ThreadedQueue<TaskBase>> &tasksQueuePtr, 
                                const std::shared_ptr<EntityQuote> &hourlyQuote,
                                const std::shared_ptr<EntityQuote> &dailyQuote,
@@ -23,7 +41,8 @@ MainCoreWorker::MainCoreWorker(const uint32_t workerId,
       m_dailyQuote{dailyQuote},
       m_tasksQueuePtr{tasksQueuePtr},
       m_workerId{workerId},
-      m_isRunning{false}
+      m_isRunning{false},
+      m_isOnPause{false}
 {
     
 }
@@ -37,6 +56,7 @@ void MainCoreWorker::start()
     while (m_isRunning) {
         dispatcher->processEvents(QEventLoop::ProcessEventsFlag::AllEvents);
         
+        if (m_isOnPause)  continue;
         if (!m_isRunning) break;
         
         auto task = m_tasksQueuePtr->takeItem();
@@ -58,6 +78,16 @@ void MainCoreWorker::stop()
     m_isRunning = false;
     
     QThread::currentThread()->quit();
+}
+
+void MainCoreWorker::pause()
+{
+    m_isOnPause = true;
+}
+
+void MainCoreWorker::unpause()
+{
+    m_isOnPause = false;
 }
 
 void MainCoreWorker::recreateDatabaseFacade()
@@ -92,11 +122,10 @@ bool MainCoreWorker::processTask(const std::unique_ptr<TaskBase> &task)
     case CoreContext::TaskType::TT_NETWORK_TASK: {
         TaskNetwork *networkTask{dynamic_cast<TaskNetwork*>(task.get())};
         
-        if (!networkTask) return false;
+        if (!networkTask)            return false;
+        if (!networkTask->isValid()) return false;
         
         auto request = networkTask->getRequest();
-        
-        if (!request.get()) return false;
         
         switch (request->getEndpointId()) {
         case ServerContext::Endpoints::E_SIGN_IN:                return processSignIn(request);
@@ -143,8 +172,6 @@ bool MainCoreWorker::processSignIn(const std::shared_ptr<NetworkContentRequest> 
     if (operationResultCode == DatabaseContext::DatabaseOperationResult::DOR_ERROR)
         return false;
     
-    std::shared_ptr<NetworkContentResponse> response{};
-    
     if (operationResultCode == DatabaseContext::DatabaseOperationResult::DOR_SUCCESS) {
         QJsonObject sessionDataJson{};
         
@@ -152,24 +179,17 @@ bool MainCoreWorker::processSignIn(const std::shared_ptr<NetworkContentRequest> 
             return false;
         if (sessionDataJson.isEmpty()) return false;
         
-        response = std::make_shared<NetworkContentResponse>(request->getWorkerId(),
-                                                            request->getSocketId(),
-                                                            NetworkContentResponse::ResponseProcessingCode::RPC_OK,
-                                                            sessionDataJson);
-    } else {
-        response = std::make_shared<NetworkContentResponse>(request->getWorkerId(),
-                                                            request->getSocketId(),
-                                                            NetworkContentResponse::ResponseProcessingCode::RPC_NOT_FOUND);
-    }
-    
-    emit requestProcessed(response);
+        sendResponseByOperationCode(operationResultCode, request, sessionDataJson);
+        
+    } else
+        sendResponseByOperationCode(operationResultCode, request);
     
     return true;
 }
 
 bool MainCoreWorker::processQuoteCreation(const std::shared_ptr<NetworkContentRequest> &request)
 {
-    auto jsonBody{request->getJsonBody()};
+    auto jsonBody = request->getJsonBody();
     
     std::unique_ptr<EntityBase> quoteDataBase{};
     
@@ -185,26 +205,36 @@ bool MainCoreWorker::processQuoteCreation(const std::shared_ptr<NetworkContentRe
     if (!getSessionTokenByJson(jsonBody, sessionToken))
         return false;
     
+    std::unique_ptr<EntitySession> session{};
+    
+    auto operationResultCode = m_dbFacade->getSessionByToken(sessionToken, session);
+    
+    if (operationResultCode == DatabaseContext::DatabaseOperationResult::DOR_ERROR)
+        return false;
+    else if (operationResultCode == DatabaseContext::DatabaseOperationResult::DOR_NOT_FOUND) {
+        sendResponseByOperationCode(operationResultCode, request);
+    }
+    
+    if (!session->isValid()) return false;
+    if (!checkSessionValidity(session)) {
+        operationResultCode = m_dbFacade->removeSessionByToken(sessionToken);
+        
+        if (operationResultCode == DatabaseContext::DatabaseOperationResult::DOR_ERROR)
+            return false;
+        
+        sendResponseByOperationCode(operationResultCode, request);
+        
+        return true;
+    }
+    
     std::unique_ptr<EntityQuote> createdQuote{};
     
-    auto operationResultCode = m_dbFacade->createQuote(sessionToken, quoteData, createdQuote);
-        
+    operationResultCode = m_dbFacade->createQuote(session, quoteData, createdQuote);
+    
     if (operationResultCode == DatabaseContext::DatabaseOperationResult::DOR_ERROR)
         return false;
     
-    std::shared_ptr<NetworkContentResponse> response{};
-    
-    if (operationResultCode == DatabaseContext::DatabaseOperationResult::DOR_SUCCESS) {
-        response = std::make_shared<NetworkContentResponse>(request->getWorkerId(),
-                                                            request->getSocketId(),
-                                                            NetworkContentResponse::ResponseProcessingCode::RPC_OK);
-    } else {
-        response = std::make_shared<NetworkContentResponse>(request->getWorkerId(),
-                                                            request->getSocketId(),
-                                                            NetworkContentResponse::ResponseProcessingCode::RPC_NOT_FOUND);
-    }
-    
-    emit requestProcessed(response);
+    sendResponseByOperationCode(operationResultCode, request);
     
     return true;
 }
@@ -227,19 +257,7 @@ bool MainCoreWorker::processGradeForQuote(const std::shared_ptr<NetworkContentRe
     if (operationResultCode == DatabaseContext::DatabaseOperationResult::DOR_ERROR)
         return false;
     
-    std::shared_ptr<NetworkContentResponse> response{};
-    
-    if (operationResultCode == DatabaseContext::DatabaseOperationResult::DOR_SUCCESS) {
-        response = std::make_shared<NetworkContentResponse>(request->getWorkerId(),
-                                                            request->getSocketId(),
-                                                            NetworkContentResponse::ResponseProcessingCode::RPC_OK);
-    } else {
-        response = std::make_shared<NetworkContentResponse>(request->getWorkerId(),
-                                                            request->getSocketId(),
-                                                            NetworkContentResponse::ResponseProcessingCode::RPC_NOT_FOUND);
-    }
-    
-    emit requestProcessed(response);
+    sendResponseByOperationCode(operationResultCode, request);
     
     return true;
 }
@@ -272,6 +290,11 @@ bool MainCoreWorker::processGettingDailyQuote(const std::shared_ptr<NetworkConte
     return true;
 }
 
+bool MainCoreWorker::checkSessionValidity(const std::unique_ptr<EntitySession> &session)
+{
+    return (QDateTime::currentDateTime() < session->getExpirationDateTime());
+}
+
 bool MainCoreWorker::generateTimeRelatedQuoteGettingResponse(const std::shared_ptr<NetworkContentRequest> &request, 
                                                              const ServerContext::Endpoints timeRelatedQuoteEndpoint,
                                                              std::shared_ptr<NetworkContentResponse> &response)
@@ -279,8 +302,22 @@ bool MainCoreWorker::generateTimeRelatedQuoteGettingResponse(const std::shared_p
     std::unique_ptr<EntityQuote> curTimeRelatedQuote{};
     
     switch (timeRelatedQuoteEndpoint) {
-    case ServerContext::Endpoints::E_GET_HOURLY_QUOTE: {curTimeRelatedQuote = std::make_unique<EntityQuote>(*m_hourlyQuote); break;}
-    case ServerContext::Endpoints::E_GET_DAILY_QUOTE:  {curTimeRelatedQuote = std::make_unique<EntityQuote>(*m_dailyQuote);  break;}
+    case ServerContext::Endpoints::E_GET_HOURLY_QUOTE: {
+        if (!m_hourlyQuote.get())
+            return processNoTimeRelatedQuotesCase(request, response);
+        
+        curTimeRelatedQuote = std::make_unique<EntityQuote>(*m_hourlyQuote);
+        
+        break;
+    }
+    case ServerContext::Endpoints::E_GET_DAILY_QUOTE:  {
+        if (!m_dailyQuote.get())
+            return processNoTimeRelatedQuotesCase(request, response);
+        
+        curTimeRelatedQuote = std::make_unique<EntityQuote>(*m_dailyQuote);  
+        
+        break;
+    }
     default: return false;
     }
     
@@ -359,20 +396,32 @@ bool MainCoreWorker::getRandomQuote(std::unique_ptr<EntityQuote> &quote)
     return true;
 }
 
-bool MainCoreWorker::getSessionTokenByJson(const QJsonObject &json, 
-                                           CoreContext::Hash &token)
+bool MainCoreWorker::processNoTimeRelatedQuotesCase(const std::shared_ptr<NetworkContentRequest> &request,
+                                                    std::shared_ptr<NetworkContentResponse> &response)
 {
-    if (json.isEmpty()) return false;
-    if (!json.contains(EntitySession::C_TOKEN_PROP_NAME))
-        return false;
-    if (!json[EntitySession::C_TOKEN_PROP_NAME].isString())
-        return false;
-    
-    CoreContext::Hash tokenBuffer{json[EntitySession::C_TOKEN_PROP_NAME].toString()};
-    
-    if (tokenBuffer.isEmpty()) return false;
-    
-    token = std::move(tokenBuffer);
+    response = std::make_shared<NetworkContentResponse>(request->getWorkerId(),
+                                                        request->getSocketId(),
+                                                        NetworkContentResponse::ResponseProcessingCode::RPC_NOT_FOUND);
     
     return true;
+}
+
+void MainCoreWorker::sendResponseByOperationCode(const DatabaseContext::DatabaseOperationResult result,
+                                                 const std::shared_ptr<NetworkContentRequest> &request,
+                                                 const QJsonObject &jsonBody)
+{
+    std::shared_ptr<NetworkContentResponse>        response   {};
+    NetworkContentResponse::ResponseProcessingCode networkCode{};
+    
+    if (result == DatabaseContext::DatabaseOperationResult::DOR_SUCCESS)
+        networkCode = NetworkContentResponse::ResponseProcessingCode::RPC_OK;
+    else
+        networkCode = NetworkContentResponse::ResponseProcessingCode::RPC_NOT_FOUND;
+    
+    response = std::make_shared<NetworkContentResponse>(request->getWorkerId(),
+                                                        request->getSocketId(),
+                                                        networkCode,
+                                                        jsonBody);
+    
+    emit requestProcessed(response);
 }

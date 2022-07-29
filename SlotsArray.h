@@ -16,11 +16,12 @@ class SlotsArray
 protected:
     bool expandSlots()
     {
-        auto **prevSlots = m_slots;
-        auto prevSize    = m_size;
+        SlotArrayItem<T> **prevSlots{m_slots};
+        
+        auto prevSize = m_size;
         
         m_size  = m_size + C_EXPAND_STEP;
-        m_slots = new T*[m_size];
+        m_slots = new SlotArrayItem<T>*[m_size];
         
         if (!m_slots) return false;
         
@@ -45,8 +46,10 @@ public:
     
     ~SlotsArray()
     {
-        for (auto i = m_slots; i < m_slots + m_size; ++i)
+        for (auto i = m_slots; i < m_slots + m_size; ++i) {
+            if (i  == nullptr) break;
             if (*i != nullptr) delete (*i);
+        }
         
         if (m_slots) delete[] m_slots;
     }
@@ -61,7 +64,7 @@ public:
         
         if (!expandSlots()) return nullptr;
         
-        return (m_slots[curIndex + 1] = new T{std::move(item)});
+        return (m_slots[curIndex + 1] = new SlotArrayItem<T>{curIndex + 1, std::move(item)});
     }
     
     SlotArrayItem<T>* getItem(const size_t index)
@@ -84,7 +87,7 @@ public:
     
 private:
     SlotArrayItem<T>** m_slots;
-    size_t            m_size;
+    size_t             m_size;
 };
 
 #endif // SLOTSARRAY_H

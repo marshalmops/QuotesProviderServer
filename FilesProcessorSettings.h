@@ -1,24 +1,27 @@
 #ifndef FILESPROCESSORSETTINGS_H
 #define FILESPROCESSORSETTINGS_H
 
-#include "FilesProcessorInterface.h"
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
 
 #include "DatabaseLayerCreator.h"
 
 #include "SettingsContainerBase.h"
 
-class FilesProcessorSettings : public virtual FilesProcessorInterface
+class FilesProcessorSettings
 {
 public:
-    FilesProcessorSettings();
+    FilesProcessorSettings() = delete;
     
-    bool saveSettings();
-    bool loadSettings();
+    static bool saveSettings();
+    static bool loadSettings();
     
 protected:
-    bool saveSettingsWithFileName(const QString &filename,
+    static bool saveSettingsWithFileName(const QString &filename,
                                   const std::shared_ptr<SettingsInterface> &settingsToSave);
-    bool loadSettingsContentWithFileName(const QString &filename,
+    static bool loadSettingsContentWithFileName(const QString &filename,
                                          QJsonObject &settingsJson);
 };
 
