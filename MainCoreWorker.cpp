@@ -29,6 +29,14 @@ bool getSessionTokenByJson(const QJsonObject &json,
     return true;
 }
 
+CoreContext::Hash getClearTextHash(const QString &text) {
+    QString preparedText{text.toLower()};
+    
+    preparedText = preparedText.remove(QRegExp{"[^A-Za-zА-Яа-я]"});
+    
+    return QString::fromUtf8(QCryptographicHash::hash(preparedText.toUtf8(), CoreContext::C_DEFAULT_TEXT_HASHING_ALGO));
+}
+
 }
 
 MainCoreWorker::MainCoreWorker(const CoreContext::Id workerId,
@@ -196,7 +204,13 @@ bool MainCoreWorker::processQuoteCreation(const std::shared_ptr<NetworkContentRe
     if (!m_entitiesProcessor->jsonToEntity(CoreContext::EntityType::ET_QUOTE, jsonBody, quoteDataBase))
         return false;
     
-    std::unique_ptr<EntityQuote> quoteData{dynamic_cast<EntityQuote*>(quoteDataBase.release())};
+    std::unique_ptr<EntityQuote> quoteDataRaw{dynamic_cast<EntityQuote*>(quoteDataBase.release())};
+    
+    CoreContext::Hash quoteHash{getClearTextHash(quoteDataRaw->getText())};
+    
+    if (quoteHash.isEmpty()) return false;
+    
+    std::unique_ptr<EntityQuote> quoteData{std::make_unique<EntityQuote>(quoteDataRaw->getText(), quoteDataRaw->getAuthor(), quoteHash)};
     
     if (!quoteData.get()) return false;
     
@@ -413,10 +427,11 @@ void MainCoreWorker::sendResponseByOperationCode(const DatabaseContext::Database
     std::shared_ptr<NetworkContentResponse>        response   {};
     NetworkContentResponse::ResponseProcessingCode networkCode{};
     
-    if (result == DatabaseContext::DatabaseOperationResult::DOR_SUCCESS)
-        networkCode = NetworkContentResponse::ResponseProcessingCode::RPC_OK;
-    else
-        networkCode = NetworkContentResponse::ResponseProcessingCode::RPC_NOT_FOUND;
+    switch (result) {
+    case DatabaseContext::DatabaseOperationResult::DOR_SUCCESS:        {networkCode = NetworkContentResponse::ResponseProcessingCode::RPC_OK;             break;}
+    case DatabaseContext::DatabaseOperationResult::DOR_NOT_FOUND:      {networkCode = NetworkContentResponse::ResponseProcessingCode::RPC_NOT_FOUND;      break;}
+    case DatabaseContext::DatabaseOperationResult::DOR_ALREADY_EXISTS: {networkCode = NetworkContentResponse::ResponseProcessingCode::RPC_ALREADY_EXISTS; break;}
+    }
     
     response = std::make_shared<NetworkContentResponse>(request->getWorkerId(),
                                                         request->getSocketId(),

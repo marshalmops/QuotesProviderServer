@@ -58,6 +58,7 @@ bool CoreEntityProcessorBase::quoteToJSON(const EntityQuote * const quote,
     
     jsonObjectBuffer[EntityQuote::C_ID_PROP_NAME]                 = QJsonValue::fromVariant(QVariant{quote->getId()});
     jsonObjectBuffer[EntityQuote::C_TEXT_PROP_NAME]               = quote->getText();
+    jsonObjectBuffer[EntityQuote::C_TEXT_HASH_PROP_NAME]          = quote->getTextHash();    
     jsonObjectBuffer[EntityQuote::C_AUTHOR_PROP_NAME]             = quote->getAuthor();
     jsonObjectBuffer[EntityQuote::C_RATING_PROP_NAME]             = quote->getRating();
     jsonObjectBuffer[EntityQuote::C_CREATOR_ID_PROP_NAME]         = QJsonValue::fromVariant(QVariant{quote->getCreatorId()});

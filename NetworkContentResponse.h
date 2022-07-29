@@ -9,6 +9,7 @@ public:
     enum ResponseProcessingCode : uint8_t {
         RPC_INVALID = 0,
         RPC_NOT_FOUND,
+        RPC_ALREADY_EXISTS,
         RPC_OK
     };
     

@@ -137,12 +137,13 @@ bool DatabaseEntityProcessorSQL::getEntityQuoteByDatabaseQueryResult(const std::
     
     auto idRawValue               = sqlQuery.value(EntityQuote::C_ID_PROP_NAME);
     auto textRawValue             = sqlQuery.value(EntityQuote::C_TEXT_PROP_NAME);
+    auto textHashRawValue         = sqlQuery.value(EntityQuote::C_TEXT_HASH_PROP_NAME);
     auto authorRawValue           = sqlQuery.value(EntityQuote::C_AUTHOR_PROP_NAME);
     auto ratingRawValue           = sqlQuery.value(EntityQuote::C_RATING_PROP_NAME);
     auto creatorIdRawValue        = sqlQuery.value(EntityQuote::C_CREATOR_ID_PROP_NAME);
     auto creationDateTimeRawValue = sqlQuery.value(EntityQuote::C_CREATION_DATE_TIME_PROP_NAME);
     
-    if (idRawValue.isNull() || textRawValue.isNull() || authorRawValue.isNull()
+    if (idRawValue.isNull() || textRawValue.isNull() || textHashRawValue.isNull() || authorRawValue.isNull()
      || ratingRawValue.isNull() || creatorIdRawValue.isNull() || creationDateTimeRawValue.isNull())
     {
         return false;
@@ -154,10 +155,11 @@ bool DatabaseEntityProcessorSQL::getEntityQuoteByDatabaseQueryResult(const std::
     
     if (!isConvOK) return false;
     
-    QString text  {textRawValue.toString()};
-    QString author{authorRawValue.toString()};
+    QString           text    {textRawValue.toString()};
+    CoreContext::Hash textHash{textHashRawValue.toString()};
+    QString           author  {authorRawValue.toString()};
     
-    if (text.isEmpty() || author.isEmpty()) return false;
+    if (text.isEmpty() || author.isEmpty() || textHash.isEmpty()) return false;
     
     EntityQuote::Rating rating{ratingRawValue.toLongLong(&isConvOK)};
     
@@ -171,7 +173,7 @@ bool DatabaseEntityProcessorSQL::getEntityQuoteByDatabaseQueryResult(const std::
     
     if (!creationDateTime.isValid()) return false;
     
-    auto newQuote = std::make_shared<EntityQuote>(text, author, creationDateTime, creatorId, id, rating);
+    auto newQuote = std::make_shared<EntityQuote>(text, author, textHash, creationDateTime, creatorId, id, rating);
     
     if (!newQuote->isValid()) return false;
     

@@ -12,6 +12,8 @@ namespace CoreContext
 using Id   = uint64_t;
 using Hash = QString;
 
+constexpr static const QCryptographicHash::Algorithm C_DEFAULT_TEXT_HASHING_ALGO = QCryptographicHash::Algorithm::Sha256;
+
 enum TaskType : uint8_t {
     TT_INVALID = 0,
     TT_CORE_TASK,

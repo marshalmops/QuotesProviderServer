@@ -10,7 +10,8 @@ namespace DatabaseContext {
 enum DatabaseOperationResult : uint8_t {
     DOR_ERROR = 0,
     DOR_NOT_FOUND,
-    DOR_SUCCESS
+    DOR_SUCCESS,
+    DOR_ALREADY_EXISTS
 };
 
 enum DatabaseType : uint8_t {

@@ -2,6 +2,7 @@
 
 EntityQuote::EntityQuote(const QString &text, 
                          const QString &author,
+                         const CoreContext::Hash &textHash,
                          const QDateTime &creationDateTime,
                          const CoreContext::Id creatorId,
                          const CoreContext::Id id,
@@ -9,6 +10,7 @@ EntityQuote::EntityQuote(const QString &text,
     : EntityBase{CoreContext::EntityType::ET_QUOTE},
       m_id{id},
       m_text{text},
+      m_textHash{textHash},
       m_author{author},
       m_rating{rating},
       m_creatorId{creatorId},
@@ -22,6 +24,7 @@ EntityQuote::EntityQuote(const EntityQuote &quote)
 {
     m_id               = quote.m_id;
     m_text             = quote.m_text;
+    m_textHash         = quote.m_textHash;
     m_author           = quote.m_author;
     m_rating           = quote.m_rating;
     m_creatorId        = quote.m_creatorId;
@@ -33,6 +36,7 @@ EntityQuote &EntityQuote::operator=(EntityQuote &&quote)
     m_type             = quote.m_type;
     m_id               = quote.m_id;
     m_text             = std::move(quote.m_text);
+    m_textHash         = std::move(quote.m_textHash);
     m_author           = std::move(quote.m_author);
     m_rating           = quote.m_rating;
     m_creatorId        = quote.m_creatorId;
@@ -47,6 +51,11 @@ CoreContext::Id EntityQuote::getId() const
 const QString &EntityQuote::getText() const
 {
     return m_text;
+}
+
+const CoreContext::Hash &EntityQuote::getTextHash() const
+{
+    return m_textHash;
 }
 
 const QString &EntityQuote::getAuthor() const

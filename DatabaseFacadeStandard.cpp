@@ -121,23 +121,39 @@ DatabaseContext::DatabaseOperationResult DatabaseFacadeStandard::createQuote(con
     if (!curUser->isValid()) 
         return DatabaseContext::DatabaseOperationResult::DOR_ERROR;
     
+    // checking quote for uniqueness...
+    
+    auto selectingQuoteByTextHashCondition = std::make_shared<DatabaseQueryConditionStandard>(DatabaseQueryContextStandard::DatabaseQueryConditionType::DQCT_EQUAL_TO, EntityQuote::C_TEXT_HASH_PROP_NAME, quoteData->getTextHash());
+    
+    std::unique_ptr<DatabaseQueryBase> selectQuoteByTextHashQuery{std::make_unique<DatabaseQueryStandardSelect>(QStringList{EntityQuote::C_QUOTE_TABLE_NAME},
+                                                                                                                QStringList{},
+                                                                                                                DatabaseQueryStandardSelect::ConditionsList{selectingQuoteByTextHashCondition})};
+    std::vector<std::shared_ptr<DatabaseQueryResultBase>> selectQuoteByTextHashResults{};
+    
+    if (!m_driver->executeQuery(selectQuoteByTextHashQuery, selectQuoteByTextHashResults))
+        return DatabaseContext::DatabaseOperationResult::DOR_ERROR;
+    if (!selectQuoteByTextHashResults.empty()) // UNIQUENESS IS FAILED CONDITION.
+        return DatabaseContext::DatabaseOperationResult::DOR_ALREADY_EXISTS;
+    
     // inserting quote...
     
-    QStringList insertingQuoteAttributes{EntityQuote::C_TEXT_PROP_NAME, 
+    QStringList insertingQuoteAttributes{EntityQuote::C_TEXT_PROP_NAME,
+                                         EntityQuote::C_TEXT_HASH_PROP_NAME,
                                          EntityQuote::C_AUTHOR_PROP_NAME,
                                          EntityQuote::C_RATING_PROP_NAME,
                                          EntityQuote::C_CREATOR_ID_PROP_NAME,
                                          EntityQuote::C_CREATION_DATE_TIME_PROP_NAME};
     
     DatabaseQueryStandardInsert::ValuesList insertingQuoteValues{quoteData->getText(),
+                                                                 quoteData->getTextHash(),
                                                                  quoteData->getAuthor(),
                                                                  quoteData->getRating(),
                                                                  curUser->getId(),
                                                                  quoteData->getCreationDateTime()};
     
     std::unique_ptr<DatabaseQueryBase> insertQuoteQuery{std::make_unique<DatabaseQueryStandardInsert>(EntityQuote::C_QUOTE_TABLE_NAME, 
-                                                                                                        insertingQuoteValues, 
-                                                                                                        insertingQuoteAttributes)};
+                                                                                                      insertingQuoteValues, 
+                                                                                                      insertingQuoteAttributes)};
      
     std::vector<std::shared_ptr<DatabaseQueryResultBase>> insertResults{};
     
@@ -262,7 +278,7 @@ DatabaseContext::DatabaseOperationResult DatabaseFacadeStandard::createGradeForQ
     
     if ((selectingGradeOperationResult = getGradeByQuoteIdAndDeviceHash(gradeData->getQuoteId(), gradeData->getDeviceHash(), selectedGrade)) != DatabaseContext::DatabaseOperationResult::DOR_NOT_FOUND) {
         return (selectingGradeOperationResult == DatabaseContext::DatabaseOperationResult::DOR_SUCCESS
-              ? DatabaseContext::DatabaseOperationResult::DOR_NOT_FOUND
+              ? DatabaseContext::DatabaseOperationResult::DOR_ALREADY_EXISTS
               : selectingGradeOperationResult);
     }
     

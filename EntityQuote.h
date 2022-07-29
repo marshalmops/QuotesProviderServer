@@ -14,6 +14,7 @@ public:
     
     constexpr static const char* C_ID_PROP_NAME                 = "id";
     constexpr static const char* C_TEXT_PROP_NAME               = "text";
+    constexpr static const char* C_TEXT_HASH_PROP_NAME          = "text_hash";
     constexpr static const char* C_AUTHOR_PROP_NAME             = "author";
     constexpr static const char* C_RATING_PROP_NAME             = "rating";
     constexpr static const char* C_CREATOR_ID_PROP_NAME         = "creator_id";
@@ -21,6 +22,7 @@ public:
     
     EntityQuote(const QString &text = QString{},
                 const QString &author = QString{},
+                const CoreContext::Hash &textHash = CoreContext::Hash{},
                 const QDateTime &creationDateTime = QDateTime::currentDateTime(),
                 const CoreContext::Id creatorId = 0,
                 const CoreContext::Id id = 0,
@@ -28,22 +30,24 @@ public:
     EntityQuote(const EntityQuote &quote);
     EntityQuote& operator=(EntityQuote &&quote);
     
-    CoreContext::Id  getId              () const;
-    const QString&   getText            () const;
-    const QString&   getAuthor          () const;
-    Rating           getRating          () const;
-    CoreContext::Id  getCreatorId       () const;
-    const QDateTime& getCreationDateTime() const;
+    CoreContext::Id          getId              () const;
+    const QString&           getText            () const;
+    const CoreContext::Hash& getTextHash        () const;
+    const QString&           getAuthor          () const;
+    Rating                   getRating          () const;
+    CoreContext::Id          getCreatorId       () const;
+    const QDateTime&         getCreationDateTime() const;
     
     virtual bool isValid() const override;
     
 private:
-    CoreContext::Id m_id;
-    QString         m_text;
-    QString         m_author;
-    Rating          m_rating;
-    CoreContext::Id m_creatorId;
-    QDateTime       m_creationDateTime;
+    CoreContext::Id   m_id;
+    QString           m_text;
+    CoreContext::Hash m_textHash;
+    QString           m_author;
+    Rating            m_rating;
+    CoreContext::Id   m_creatorId;
+    QDateTime         m_creationDateTime;
     
 };
 
