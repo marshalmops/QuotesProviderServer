@@ -60,14 +60,14 @@ Error StringVariantMapModel::removeStringValuePair(const QModelIndex &index)
     return (removeRows(index.row()) ? Error{} : Error{tr("Pair removing failed!").toStdString(), true});
 }
 
-QMap<QString, QVariant>&& StringVariantMapModel::getStringVariantMap() const
+QMap<QString, QVariant> StringVariantMapModel::getStringVariantMap() const
 {
     QMap<QString, QVariant> stringVariantMap{};
     
     foreach (const auto &item, m_stringVariantMap)
         stringVariantMap[item.first] = item.second;
     
-    return std::move(stringVariantMap);
+    return stringVariantMap;
 }
 
 bool StringVariantMapModel::insertRows(int row, 

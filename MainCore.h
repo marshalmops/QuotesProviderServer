@@ -71,6 +71,8 @@ public slots:
     void unpause();
     void pause  ();
     
+    void processClose();
+    
     // from core workers:
     
     //void passResponseToServer(std::shared_ptr<NetworkContentResponse> response);
@@ -78,6 +80,9 @@ public slots:
     // from server:
     
     void passRequestToWorker(std::shared_ptr<NetworkContentRequest> request);
+    
+private:
+    void stop();
     
 private:
     std::shared_ptr<ThreadedQueue<TaskBase>> m_tasksQueue;
@@ -90,7 +95,7 @@ private:
     
     CoreContext::Id m_stoppedThreadsCount;
     
-    bool m_isCriticalErrorOnProcessing;
+    bool m_isClosing;
 };
 
 #endif // MAINCORE_H

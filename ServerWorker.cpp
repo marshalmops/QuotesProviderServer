@@ -11,24 +11,21 @@ ServerWorker::ServerWorker(//ThreadedQueue<ServerContext::Socket> *newClientsSoc
       m_connections{},
       m_ioContextPtr{ioContextPtr},
       m_acceptorPtr{acceptorPtr},
-      m_httpResponseCreator{std::make_unique<NetworkHttpResponseCreator>()},
-      m_runningFlag{true}
+      m_httpResponseCreator{std::make_unique<NetworkHttpResponseCreator>()}
+    //, m_runningFlag{true}
 {
     if (workerId == 0) acceptConnectionAsync();
 }
 
 void ServerWorker::start()
 {
-    boost::system::error_code error{};
-    
-    while (m_runningFlag.load(std::memory_order_acquire)) {
-        m_ioContextPtr->run_one(error);
+    while (m_ioContextPtr->run_one()/*m_runningFlag.load(std::memory_order_acquire)*/) {
         
-        if (error) {
-            emit errorOccured(Error{error.message(), true});
+//        if (error) {
+//            emit errorOccured(Error{error.message(), true});
             
-            return;
-        }
+//            return;
+//        }
         
         std::unique_ptr response = m_responsesQueue.takeItem();
         
@@ -66,10 +63,10 @@ void ServerWorker::start()
     emit stopped();
 }
 
-void ServerWorker::stop()
-{
-    m_runningFlag.store(false, std::memory_order_release);
-}
+//void ServerWorker::stop()
+//{
+//    m_runningFlag.store(false, std::memory_order_release);
+//}
 
 void ServerWorker::acceptConnectionAsync()
 {

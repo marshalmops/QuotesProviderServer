@@ -18,10 +18,10 @@ DatabaseSettingsBase::DatabaseSettingsBase(DatabaseSettingsBase &&settings)
 
 DatabaseSettingsBase::DatabaseSettingsBase(const QUrl &url,
                                            const DatabaseContext::DatabaseType dbType,
-                                           const AdditionalPropsMap &additionalProps)
+                                           AdditionalPropsMap &&additionalProps)
     : m_dbType{dbType},
       m_dbUrl{url},
-      m_additionalProps{additionalProps}
+      m_additionalProps{std::move(additionalProps)}
 {
     
 }
@@ -50,18 +50,17 @@ bool DatabaseSettingsBase::toJson (QJsonObject &json) const
     jsonBuffer[C_DATABASE_TYPE_PROP_NAME] = m_dbType;
     jsonBuffer[C_DATABASE_URL_PROP_NAME]  = m_dbUrl.toString(QUrl::ComponentFormattingOption::FullyEncoded);
     
-    if (m_additionalProps.empty())
-        return !json.empty();
-    
     QJsonObject additionalPropsObj{};
     
-    for (auto i = m_additionalProps.begin(); i != m_additionalProps.end(); ++i) {
-        if (i.key().isEmpty()) return false;
+    if (!m_additionalProps.empty()) {
+        for (auto i = m_additionalProps.begin(); i != m_additionalProps.end(); ++i) {
+            if (i.key().isEmpty()) return false;
+            
+            additionalPropsObj[i.key()] = i.value().toJsonValue();
+        }
         
-        additionalPropsObj[i.key()] = i.value().toJsonValue();
+        if (additionalPropsObj.isEmpty()) return false;
     }
-    
-    if (additionalPropsObj.isEmpty()) return false;
     
     jsonBuffer[C_DATABASE_ADDITIONAL_PROPS_PROP_NAME] = additionalPropsObj;
     

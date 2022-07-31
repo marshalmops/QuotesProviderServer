@@ -4,7 +4,7 @@ bool SettingsContainerEditable::setDatabaseSettings(std::unique_ptr<DatabaseSett
 {
     if (!dbSettings->isValid()) return false;
     
-    m_dbSettings = std::shared_ptr<DatabaseSettingsBase>{dbSettings.release()};
+    m_dbSettings.reset(dbSettings.release());
     
     return true;
 }
@@ -13,7 +13,7 @@ bool SettingsContainerEditable::setCoreSettings(std::unique_ptr<CoreSettingsBase
 {
     if (!coreSettings->isValid()) return false;
     
-    m_coreSettings = std::shared_ptr<CoreSettingsBase>{coreSettings.release()};
+    m_coreSettings.reset(coreSettings.release());
     
     return true;
 }

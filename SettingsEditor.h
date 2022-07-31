@@ -48,7 +48,7 @@ private:
                                          const uint32_t tokenExpirationTime);
     bool processDatabaseSettingsModification(const QUrl &dbUrl,
                                              const DatabaseContext::DatabaseType dbType,
-                                             const DatabaseSettingsBase::AdditionalPropsMap &additionalProps);
+                                             DatabaseSettingsBase::AdditionalPropsMap &&additionalProps);
     
 private:
     QLineEdit *m_hashingSaltLineEdit;

@@ -30,7 +30,7 @@ StringVariantMapWidget::StringVariantMapWidget(const QString &label,
     connect(m_removeStringVariantPairButton, &QPushButton::clicked, this, &StringVariantMapWidget::removeCurrentItem);
 }
 
-QMap<QString, QVariant> &&StringVariantMapWidget::getStringVariantMap() const
+QMap<QString, QVariant> StringVariantMapWidget::getStringVariantMap() const
 {
     return m_model->getStringVariantMap();
 }

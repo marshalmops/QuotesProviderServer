@@ -26,7 +26,7 @@ public:
     Error addStringValuePair   (const std::pair<QString, QVariant> &stringVariantPair); 
     Error removeStringValuePair(const QModelIndex &index);
     
-    QMap<QString, QVariant>&& getStringVariantMap() const;
+    QMap<QString, QVariant> getStringVariantMap() const;
     
 private:
     virtual bool insertRows(int row = 1,

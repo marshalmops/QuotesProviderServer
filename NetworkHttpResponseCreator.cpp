@@ -43,8 +43,9 @@ bool NetworkHttpResponseCreator::responseProcessingCodeToHttpCodeString(const Ne
     if (code == NetworkContentResponse::ResponseProcessingCode::RPC_INVALID) return false;
     
     static const std::unordered_map<NetworkContentResponse::ResponseProcessingCode, std::string> responseCodeHttpCodeHash = {
-        {NetworkContentResponse::ResponseProcessingCode::RPC_NOT_FOUND, "404 NOT FOUND"},
-        {NetworkContentResponse::ResponseProcessingCode::RPC_OK,        "200 OK"}
+        {NetworkContentResponse::ResponseProcessingCode::RPC_NOT_FOUND,      "404 NOT FOUND"},
+        {NetworkContentResponse::ResponseProcessingCode::RPC_OK,             "200 OK"},
+        {NetworkContentResponse::ResponseProcessingCode::RPC_ALREADY_EXISTS, "400 BAD REQUEST"}
     };
     
     if (responseCodeHttpCodeHash.find(code) == responseCodeHttpCodeHash.end()) return false;

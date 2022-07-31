@@ -28,7 +28,9 @@ int getDatabaseTypeIndex(const DatabaseContext::DatabaseType type) {
 
 }
 SettingsEditor::SettingsEditor(QWidget *parent)
-    : QDialog{parent}
+    : QDialog{parent},
+      m_isCoreSettingsModified    {false},
+      m_isDatabaseSettingsModified{false}
 {
     // core settings:
     
@@ -189,7 +191,7 @@ void SettingsEditor::processAccept()
             return;
     
     if (m_isDatabaseSettingsModified)
-        if (!processDatabaseSettingsModification(dbUrl, databaseType, m_additionalPropsMap->getStringVariantMap()))
+        if (!processDatabaseSettingsModification(dbUrl, databaseType, std::forward<QMap<QString, QVariant>>(m_additionalPropsMap->getStringVariantMap())))
            return;
     
     QDialog::accept();
@@ -220,9 +222,9 @@ bool SettingsEditor::processCoreSettingsModification(const QString &hashingSalt,
                                                      const QCryptographicHash::Algorithm hashingAlgo,
                                                      const uint32_t tokenExpirationTime)
 {
-    auto newCoreSettings = std::make_shared<CoreSettingsBase>(m_hashingSaltLineEdit->text(),
+    auto newCoreSettings = std::make_shared<CoreSettingsBase>(hashingSalt,
                                                               hashingAlgo,
-                                                              m_tokenExpirationTimeSpinBox->value());
+                                                              tokenExpirationTime);
     
     if (!newCoreSettings->isValid()) {
         QMessageBox::warning(this, tr("Error"), tr("Provided core settings data is not correct!"));
@@ -237,11 +239,11 @@ bool SettingsEditor::processCoreSettingsModification(const QString &hashingSalt,
 
 bool SettingsEditor::processDatabaseSettingsModification(const QUrl &dbUrl,
                                                          const DatabaseContext::DatabaseType dbType,
-                                                         const DatabaseSettingsBase::AdditionalPropsMap &additionalProps)
+                                                         DatabaseSettingsBase::AdditionalPropsMap &&additionalProps)
 {
     auto newDatabaseSettings = std::make_shared<DatabaseSettingsBase>(dbUrl,
                                                                       dbType,
-                                                                      m_additionalPropsMap->getStringVariantMap());
+                                                                      std::forward<QMap<QString, QVariant>>((additionalProps)));
     
     if (!newDatabaseSettings->isValid()) {
         QMessageBox::warning(this, tr("Error"), tr("Provided database settings data is not correct!"));

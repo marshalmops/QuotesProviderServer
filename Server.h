@@ -22,7 +22,7 @@ class Server : public QObject
 {
     Q_OBJECT
 public:
-    constexpr static const uint16_t C_DEFAULT_PORT = 25999;
+    constexpr static const uint16_t C_DEFAULT_PORT = 80;
     
     explicit Server(const ServerContext::Port port = C_DEFAULT_PORT,
                     QObject *parent = nullptr);

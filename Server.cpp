@@ -40,6 +40,8 @@ void Server::start(const uint16_t workersCount)
         
         eventDispatcher->processEvents(QEventLoop::ProcessEventsFlag::AllEvents);
     }
+    
+    emit networkStopped();
 }
 
 void Server::launchWorkers(const uint16_t workersCount)
@@ -63,8 +65,10 @@ void Server::launchWorkers(const uint16_t workersCount)
 
 void Server::stop()
 {
-    for (auto i = m_serverWorkers.begin(); i != m_serverWorkers.end(); ++i)
-        (*i)->stop();
+    m_ioContext.stop();
+    
+//    for (auto i = m_serverWorkers.begin(); i != m_serverWorkers.end(); ++i)
+//        (*i)->stop();
 }
 
 void Server::processWorkerStop()
@@ -75,8 +79,6 @@ void Server::processWorkerStop()
         return;
     
     m_isRunning = false;
-    
-    emit networkStopped();
 }
 
 //void Server::acceptConnectionAsync()

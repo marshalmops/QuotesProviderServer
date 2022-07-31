@@ -16,7 +16,7 @@ public:
                            const QMap<QString, QVariant> &prevMap = QMap<QString, QVariant>{},
                            QWidget *parent = nullptr);
     
-    QMap<QString, QVariant>&& getStringVariantMap() const;
+    QMap<QString, QVariant> getStringVariantMap() const;
     
 signals:
     void errorOccured(const Error error);

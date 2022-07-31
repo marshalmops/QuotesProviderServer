@@ -28,7 +28,7 @@ public:
     DatabaseSettingsBase(DatabaseSettingsBase &&settings);
     DatabaseSettingsBase(const QUrl &url,
                          const DatabaseContext::DatabaseType dbType = DatabaseContext::DatabaseType::DT_INVALID,
-                         const AdditionalPropsMap &additionalProps = AdditionalPropsMap{});
+                         AdditionalPropsMap &&additionalProps = AdditionalPropsMap{});
     
     DatabaseContext::DatabaseType getDatabaseType() const;
     

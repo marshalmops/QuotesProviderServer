@@ -10,7 +10,7 @@ MainCore::MainCore(const CoreContext::Id workersCount,
       m_workersCount       {workersCount},
       m_otherThreadsCount  {otherThreadsCount},
       m_stoppedThreadsCount{0},
-      m_isCriticalErrorOnProcessing{false}
+      m_isClosing{false}
 {
                             
 }
@@ -67,15 +67,13 @@ bool MainCore::launchWorkers()
 
 void MainCore::processError(const Error err)
 {
-    if (m_isCriticalErrorOnProcessing) return;
+    if (m_isClosing) return;
     
     emit showError(err);
     
     if (!err.isCritical()) return;
     
-    m_isCriticalErrorOnProcessing = true;
-            
-    emit stopRequested();
+    stop();
 }
 
 void MainCore::processThreadStop()
@@ -106,12 +104,20 @@ void MainCore::changeHourlyQuote()
 
 void MainCore::resetCoreSettings(const std::shared_ptr<CoreSettingsBase> newCoreSettings)
 {
-    SettingsContainerEditable::setCoreSettings(std::make_unique<CoreSettingsBase>(std::move(*(newCoreSettings.get()))));
+    if (!SettingsContainerEditable::setCoreSettings(std::make_unique<CoreSettingsBase>(std::move(*(newCoreSettings.get()))))) {
+        processError(Error{"Core settings updating error!", true});
+        
+        return;
+    }
 }
 
 void MainCore::recreateDatabaseLayer(const std::shared_ptr<DatabaseSettingsBase> newDatabaseSettings)
 {
-    DatabaseLayerCreator::createDatabaseSettingsUsingBase(std::make_unique<DatabaseSettingsBase>(std::move(*(newDatabaseSettings.get()))));
+    if (!DatabaseLayerCreator::createDatabaseSettingsUsingBase(std::make_unique<DatabaseSettingsBase>(std::move(*(newDatabaseSettings.get()))))) {
+        processError(Error{"Database settings updating error!", true});
+        
+        return;
+    }
 
     emit databaseFacadeRecreationRequested();
 }
@@ -124,6 +130,11 @@ void MainCore::unpause()
 void MainCore::pause()
 {
     emit pauseRequested();
+}
+
+void MainCore::processClose()
+{
+    stop();
 }
 
 void MainCore::passRequestToWorker(std::shared_ptr<NetworkContentRequest> request)
@@ -149,4 +160,13 @@ void MainCore::passRequestToWorker(std::shared_ptr<NetworkContentRequest> reques
     emit logInfoGenerated(logData);
     
     m_tasksQueue->pushItem(std::make_unique<TaskNetwork>(request));
+}
+
+void MainCore::stop()
+{
+    if (m_isClosing) return;
+    
+    m_isClosing = true;
+            
+    emit stopRequested();
 }

@@ -7,6 +7,8 @@ AppView::AppView(QWidget *parent)
     
     m_logTextEdit = new QTextEdit{};
     
+    m_logTextEdit->setEnabled(false);
+    
     QVBoxLayout *logLayout = new QVBoxLayout{};
     
     logLayout->addWidget(logLabel);

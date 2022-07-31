@@ -33,7 +33,7 @@ public:
                  QObject *parent = nullptr);
     
     void start();
-    void stop();
+    //void stop();
     
     void processResponse(std::shared_ptr<NetworkContentResponse> &response);
     
@@ -60,7 +60,7 @@ private:
     
     std::unique_ptr<NetworkHttpResponseCreator> m_httpResponseCreator;
     
-    std::atomic<bool> m_runningFlag;
+    //std::atomic<bool> m_runningFlag;
 };
 
 #endif // SERVERWORKER_H

@@ -33,6 +33,7 @@ bool AppInitializer::initializeApp(std::unique_ptr<AppView> &appView,
     QObject::connect(appView.get(), &AppView::pause,                    mainCore.get(), &MainCore::pause);
     QObject::connect(appView.get(), &AppView::coreSettingsChanged,      mainCore.get(), &MainCore::resetCoreSettings);
     QObject::connect(appView.get(), &AppView::databaseSettingsChanged,  mainCore.get(), &MainCore::recreateDatabaseLayer);
+    QObject::connect(appView.get(), &AppView::finished,                 mainCore.get(), &MainCore::processClose);
     
     // MainCore -> AppView
     
