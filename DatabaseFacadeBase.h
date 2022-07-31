@@ -17,6 +17,9 @@ public:
                        std::unique_ptr<DatabaseEntityProcessorInterface> &&entityProcessor);
     virtual ~DatabaseFacadeBase() = default;
     
+    virtual bool testDatabaseCorrectness() = 0;
+    virtual bool initializeTables       () = 0;
+    
     virtual DatabaseContext::DatabaseOperationResult createUserSession  (const std::unique_ptr<EntityUser> &userData,
                                                                          const std::unique_ptr<EntitySession> &sessionData,
                                                                          std::unique_ptr<EntitySession> &createdSession) = 0;

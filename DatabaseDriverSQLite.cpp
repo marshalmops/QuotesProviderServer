@@ -36,20 +36,5 @@ bool DatabaseDriverSQLite::executeQuery(const std::unique_ptr<DatabaseQueryBase>
     
     if (parsedQueryString.isEmpty()) return false;
     
-    QSqlDatabase db       {QSqlDatabase::database(m_connectionName)};
-    QSqlQuery    rawResult{db.exec(parsedQueryString)};
-    
-    if (rawResult.lastError().isValid()) return false;
-    
-    std::vector<std::shared_ptr<DatabaseQueryResultBase>> resultsBuffer{};
-    
-    while (rawResult.next()) {
-        if (!rawResult.isValid()) return false;
-        
-        resultsBuffer.push_back(std::make_shared<DatabaseQueryResultStandard>(rawResult));
-    }
-    
-    results = std::move(resultsBuffer);
-    
-    return true;
+    return (executeRawQuery(parsedQueryString, results));
 }

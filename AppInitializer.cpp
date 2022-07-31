@@ -9,6 +9,11 @@ bool AppInitializer::initializeApp(std::unique_ptr<AppView> &appView,
         createDefaultDatabaseSettings();
     }
     
+    std::unique_ptr<DatabaseFacadeBase> testFacade{};
+    
+    if (!DatabaseLayerCreator::createDatabaseFacade("test", testFacade))
+        return false;
+    
     appView = std::make_unique<AppView>();
     
     auto totalThreadsCount = QThread::idealThreadCount();

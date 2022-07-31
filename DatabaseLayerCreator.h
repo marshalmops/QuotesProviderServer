@@ -21,6 +21,9 @@ public:
     static bool createDatabaseSettingsUsingBase(std::unique_ptr<DatabaseSettingsBase> &&databaseSettingsBase);
     static bool createDatabaseFacade           (const QString &connectionName,
                                                 std::unique_ptr<DatabaseFacadeBase> &databaseFacade);
+    
+private:
+    static std::atomic_flag m_tablesInitializingFlag;
 };
 
 #endif // DATABASELAYERCREATOR_H

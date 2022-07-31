@@ -17,6 +17,9 @@ public:
     DatabaseFacadeStandard(std::unique_ptr<DatabaseDriverStandard> &&driver,
                            std::unique_ptr<DatabaseEntityProcessorSQL> &&entityProcessor);
     
+    virtual bool testDatabaseCorrectness() override;
+    virtual bool initializeTables       () override;
+    
     virtual DatabaseContext::DatabaseOperationResult createUserSession  (const std::unique_ptr<EntityUser> &userData,
                                                                          const std::unique_ptr<EntitySession> &sessionData,
                                                                          std::unique_ptr<EntitySession> &createdSession) override;

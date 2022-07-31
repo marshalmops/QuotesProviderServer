@@ -47,6 +47,8 @@ bool MainCore::launchWorkers()
         
         newThread->start();
     }
+
+    emit databaseFacadeRecreationRequested();
     
     // timers creation:
     

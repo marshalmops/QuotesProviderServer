@@ -8,6 +8,68 @@ DatabaseFacadeStandard::DatabaseFacadeStandard(std::unique_ptr<DatabaseDriverSta
     
 }
 
+bool DatabaseFacadeStandard::testDatabaseCorrectness()
+{
+    auto *driver = dynamic_cast<DatabaseDriverStandard*>(m_driver.get());
+    
+    if (!driver) return false;
+    
+    QStringList tables{EntityQuote::C_QUOTE_TABLE_NAME,
+                       EntityGrade::C_GRADE_TABLE_NAME,
+                       EntitySession::C_SESSION_TABLE_NAME,
+                       EntityUser::C_USER_TABLE_NAME};
+    
+    return driver->checkTablesOnExisting(tables);
+}
+
+bool DatabaseFacadeStandard::initializeTables()
+{
+    QString creationQueryString{};
+    std::vector<std::shared_ptr<DatabaseQueryResultBase>> results{};
+    
+    creationQueryString += QString("CREATE TABLE ") + EntityGrade::C_GRADE_TABLE_NAME + '(';
+    creationQueryString += QString(EntityGrade::C_QUOTE_ID_PROP_NAME) + " INT NOT NULL,";
+    creationQueryString += QString(EntityGrade::C_DEVICE_HASH_PROP_NAME) + " VARCHAR(511) NOT NULL,";
+    creationQueryString += QString(EntityGrade::C_GRADE_PROP_NAME) + " INT NOT NULL);";
+    
+    if (!m_driver->executeRawQuery(creationQueryString, results))
+        return false;
+    
+    creationQueryString.clear();
+    
+    creationQueryString += QString("CREATE TABLE ") + EntityQuote::C_QUOTE_TABLE_NAME + '(';
+    creationQueryString += QString(EntityQuote::C_ID_PROP_NAME) + " INT NOT NULL PRIMARY KEY,";
+    creationQueryString += QString(EntityQuote::C_TEXT_PROP_NAME) + " NVARCHAR(2047) NOT NULL,";
+    creationQueryString += QString(EntityQuote::C_TEXT_HASH_PROP_NAME) + " VARCHAR(511) NOT NULL,";
+    creationQueryString += QString(EntityQuote::C_AUTHOR_PROP_NAME) + " NVARCHAR(511) NOT NULL,";
+    creationQueryString += QString(EntityQuote::C_RATING_PROP_NAME) + " INT NOT NULL,";
+    creationQueryString += QString(EntityQuote::C_CREATOR_ID_PROP_NAME) + " INT NOT NULL,";    
+    creationQueryString += QString(EntityQuote::C_CREATION_DATE_TIME_PROP_NAME) + " DATE NOT NULL);";
+    
+    if (!m_driver->executeRawQuery(creationQueryString, results))
+        return false;
+    
+    creationQueryString.clear();
+    
+    creationQueryString += QString("CREATE TABLE ") + EntitySession::C_SESSION_TABLE_NAME + '(';
+    creationQueryString += QString(EntitySession::C_ID_PROP_NAME) + " INT NOT NULL,";
+    creationQueryString += QString(EntitySession::C_TOKEN_PROP_NAME) + " VARCHAR(511) NOT NULL,";
+    creationQueryString += QString(EntitySession::C_CREATION_DATE_TIME_PROP_NAME) + " DATE NOT NULL,";    
+    creationQueryString += QString(EntitySession::C_EXPIRATION_DATE_TIME_PROP_NAME) + " DATE NOT NULL);";
+    
+    if (!m_driver->executeRawQuery(creationQueryString, results))
+        return false;
+    
+    creationQueryString.clear();
+    
+    creationQueryString += QString("CREATE TABLE ") + EntityUser::C_USER_TABLE_NAME + '(';
+    creationQueryString += QString(EntityUser::C_ID_PROP_NAME) + " INT NOT NULL PRIMARY KEY,";
+    creationQueryString += QString(EntityUser::C_EMAIL_PROP_NAME) + " VARCHAR(127) NOT NULL,";
+    creationQueryString += QString(EntityUser::C_PASSWORD_PROP_NAME) + " NVARCHAR(127) NOT NULL);";
+    
+    return (m_driver->executeRawQuery(creationQueryString, results));
+}
+
 DatabaseContext::DatabaseOperationResult DatabaseFacadeStandard::createUserSession(const std::unique_ptr<EntityUser> &userData, 
                                                                                    const std::unique_ptr<EntitySession> &sessionData,
                                                                                    std::unique_ptr<EntitySession> &createdSession)

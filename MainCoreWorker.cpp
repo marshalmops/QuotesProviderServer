@@ -47,6 +47,8 @@ MainCoreWorker::MainCoreWorker(const CoreContext::Id workerId,
     : QObject{parent},
       m_hourlyQuote{hourlyQuote},
       m_dailyQuote{dailyQuote},
+      m_dbFacade{nullptr},
+      m_entitiesProcessor{nullptr},
       m_tasksQueuePtr{tasksQueuePtr},
       m_workerId{workerId},
       m_isRunning{false},
@@ -107,8 +109,11 @@ void MainCoreWorker::recreateDatabaseFacade()
         
         return;
     }
-        
-    m_dbFacade.reset(newDatabaseFacade.release());
+    
+    if (m_dbFacade.get())
+        m_dbFacade.reset(newDatabaseFacade.release());
+    else
+        m_dbFacade = std::move(newDatabaseFacade);
 }
 
 bool MainCoreWorker::processTask(const std::unique_ptr<TaskBase> &task)

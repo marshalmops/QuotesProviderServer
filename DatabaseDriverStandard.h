@@ -16,7 +16,13 @@ class DatabaseDriverStandard : public DatabaseDriverBase
 public:
     DatabaseDriverStandard(const QString &connectionName,
                            std::unique_ptr<DatabaseQueryParserStandard> &&queryParser);
+    virtual ~DatabaseDriverStandard() override;
+    
+    virtual bool executeRawQuery(const QString &rawQuery,
+                                 std::vector<std::shared_ptr<DatabaseQueryResultBase>> &results) override;
 
+    bool checkTablesOnExisting(const QStringList &tablesToCheck);
+    
 protected:
     QString m_connectionName;
 };
