@@ -10,17 +10,17 @@ NetworkContentResponse::NetworkContentResponse(const ServerContext::WorkerId wor
     
 }
 
-bool NetworkContentResponse::fromRawData(const ServerContext::RawData &rawData)
-{
-    size_t curIndex = 0;
+//bool NetworkContentResponse::fromRawData(const ServerContext::RawData &rawData)
+//{
+//    size_t curIndex = 0;
     
-    auto rawJsonBody = rawData.substr(curIndex);
-    auto jsonBody    = QJsonDocument::fromJson(QByteArray{rawJsonBody.data()}).object();
+//    auto rawJsonBody = rawData.substr(curIndex);
+//    auto jsonBody    = QJsonDocument::fromJson(QByteArray{rawJsonBody.data()}).object();
     
-    m_jsonBody = jsonBody;
+//    m_jsonBody = jsonBody;
     
-    return true;
-}
+//    return true;
+//}
 
 bool NetworkContentResponse::toRawData(ServerContext::RawData &rawData)
 {

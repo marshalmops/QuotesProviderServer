@@ -14,11 +14,16 @@ public:
     
     ServerContext::EndpointId getEndpointId() const;
     
-    virtual bool fromRawData(const ServerContext::RawData &rawData) override;
+    //virtual bool fromRawData(const ServerContext::RawData &rawData) override;
     virtual bool isValid() const override;
+    
+    bool fromRequestBase(const ServerContext::EndpointId endpoint,
+                         const ServerContext::RawData &rawJson);
     
 private:
     ServerContext::EndpointId m_endpointId;
 };
+
+Q_DECLARE_METATYPE(std::shared_ptr<NetworkContentRequest>)
 
 #endif // NETWORKCONTENTREQUEST_H

@@ -19,7 +19,7 @@ public:
     ServerContext::SocketId getSocketId() const;
     const QJsonObject&      getJsonBody() const;
     
-    virtual bool fromRawData(const ServerContext::RawData &rawData) = 0;
+    //virtual bool fromRawData(const ServerContext::RawData &rawData) = 0;
     virtual bool isValid    ()                                const = 0;
     
 protected:

@@ -48,7 +48,7 @@ MainCoreWorker::MainCoreWorker(const CoreContext::Id workerId,
       m_hourlyQuote{hourlyQuote},
       m_dailyQuote{dailyQuote},
       m_dbFacade{nullptr},
-      m_entitiesProcessor{nullptr},
+      m_entitiesProcessor{std::make_unique<CoreEntityProcessorBase>()},
       m_tasksQueuePtr{tasksQueuePtr},
       m_workerId{workerId},
       m_isRunning{false},
@@ -158,7 +158,7 @@ bool MainCoreWorker::processTask(const std::unique_ptr<TaskBase> &task)
 
 bool MainCoreWorker::processSignIn(const std::shared_ptr<NetworkContentRequest> &request)
 {
-    std::unique_ptr<EntityBase> userSignInData{};
+    std::unique_ptr<EntityBase> userSignInData{nullptr};
     
     if (!m_entitiesProcessor->jsonToEntity(CoreContext::EntityType::ET_USER, request->getJsonBody(), userSignInData))
         return false;

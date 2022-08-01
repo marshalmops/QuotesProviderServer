@@ -65,7 +65,7 @@ SOURCES += \
         NetworkContentBase.cpp \
         NetworkContentRequest.cpp \
         NetworkContentResponse.cpp \
-        NetworkHttpResponseCreator.cpp \
+        NetworkHttpPacketProcessor.cpp \
         Server.cpp \
         ServerConnection.cpp \
         ServerWorker.cpp \
@@ -137,7 +137,7 @@ HEADERS += \
     NetworkContentBase.h \
     NetworkContentRequest.h \
     NetworkContentResponse.h \
-    NetworkHttpResponseCreator.h \
+    NetworkHttpPacketProcessor.h \
     Server.h \
     ServerConnection.h \
     ServerContext.h \

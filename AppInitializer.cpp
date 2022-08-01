@@ -21,10 +21,12 @@ bool AppInitializer::initializeApp(std::unique_ptr<AppView> &appView,
     uint16_t networkWorkersCount{1};
     uint16_t coreWorkersCount   {1};
     
+#ifndef QT_DEBUG
     if (totalThreadsCount > 1) {
         networkWorkersCount = (totalThreadsCount % 2 == 0 ? totalThreadsCount / 2 - 1 : totalThreadsCount / 2);
         coreWorkersCount    = (totalThreadsCount / 2 - 1);
     }
+#endif
     
     mainCore = std::make_unique<MainCore>(coreWorkersCount, 1);
     server   = std::make_unique<Server>();

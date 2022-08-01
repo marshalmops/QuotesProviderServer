@@ -7,6 +7,12 @@ ServerConnection::ServerConnection(Socket &&socket)
     
 }
 
+ServerConnection::~ServerConnection()
+{
+    if (m_socket.is_open())
+        m_socket.close();
+}
+
 ServerConnection::ServerConnection(ServerConnection &&other)
     : m_socket{std::move(other.m_socket)},
       m_buffer{}
@@ -14,36 +20,65 @@ ServerConnection::ServerConnection(ServerConnection &&other)
     
 }
 
-bool ServerConnection::readData(ServerContext::RawData &readData)
+Error ServerConnection::readData(std::unique_ptr<ServerContext::HttpRequest> &readData)
 {
-    if (!m_socket.is_open()) return false;
+    if (!m_socket.is_open()) 
+        return Error{"Socket is not open!", true};
     
-    auto readBytesCount = read_until(m_socket, m_buffer, '\n');
+    ServerContext::HttpRequest request{};
     
-    if (readBytesCount <= 0) return false;
+    boost::system::error_code err{};
+    boost::beast::http::read(m_socket, m_buffer, request, err);
+            
+    if (err)
+        return Error{err.message(), false};
     
-    std::istream readStream{&m_buffer};
+    readData = std::make_unique<ServerContext::HttpRequest>(std::move(request));
     
-    readStream >> readData;
+//    auto readBytesCount = read_until(m_socket, m_buffer, "\r\n\r\n");
     
-    m_buffer.commit(readBytesCount);
+//    if (readBytesCount <= 0) return false;
     
-    return true;
+//    std::istream readStream{&m_buffer};
+    
+//    readStream >> readData;
+    
+//    m_buffer.commit(readBytesCount);
+    
+    return Error{};
 }
 
-bool ServerConnection::writeData(const ServerContext::RawData &dataToWrite)
+Error ServerConnection::writeData(const std::unique_ptr<ServerContext::HttpResponse> &httpDataToWrite)
 {
-    if (!m_socket.is_open() || dataToWrite.empty()) return false;
+    if (!m_socket.is_open()) 
+        return Error{"Socket is not open!", true};
     
-    std::ostream writeStream{&m_buffer};
+    httpDataToWrite->prepare_payload();
     
-    writeStream << dataToWrite;
+    boost::beast::http::serializer<false, boost::beast::http::string_body> serializer{*dynamic_cast<boost::beast::http::message<false, boost::beast::http::string_body>*>(httpDataToWrite.get())};
+    boost::system::error_code err{};
     
-    auto writtenBytesCount = write(m_socket, m_buffer);
+    boost::beast::http::write(m_socket, serializer, err);
     
-    if (writtenBytesCount <= 0) return false;
+    return (err ? Error{err.message(), true} : Error{});
+}
+
+Error ServerConnection::writeData(const ServerContext::RawData &dataToWrite)
+{
+//    if (!m_socket.is_open() || dataToWrite.empty()) 
+//        return boost::system::error_code{};
     
-    m_buffer.consume(writtenBytesCount);
+//    std::ostream writeStream{&m_buffer};
     
-    return true;
+//    writeStream << dataToWrite;
+    
+//    auto writtenBytesCount = write(m_socket, m_buffer);
+    
+//    if (writtenBytesCount <= 0) return false;
+    
+//    m_buffer.consume(writtenBytesCount);
+    
+//    return true;
+    
+    return Error{};
 }

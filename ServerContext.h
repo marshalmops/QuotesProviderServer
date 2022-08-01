@@ -1,6 +1,7 @@
 #ifndef SERVERCONTEXT_H
 #define SERVERCONTEXT_H
 
+#include <boost/beast/http.hpp>
 #include <stdint.h>
 #include <QString>
 #include <QHash>
@@ -13,9 +14,14 @@ using SocketId   = uint64_t;
 using EndpointId = uint32_t;
 using Port       = uint16_t;
 
+using HttpRequest  = boost::beast::http::request<boost::beast::http::string_body>;
+using HttpResponse = boost::beast::http::response<boost::beast::http::string_body>;
+
 using RawData = std::string;
 
 using Socket = boost::asio::ip::tcp::socket;
+
+constexpr static const unsigned C_HTTP_VERSION = 11;
 
 enum Endpoints : EndpointId {
     E_INVALID = 0,
@@ -28,19 +34,32 @@ enum Endpoints : EndpointId {
     E_COUNT
 };
 
-static const QString& getStringByEndpointId(const EndpointId endpointId) {
+static const QHash<EndpointId, QString>& getEndpointStringHash() {
+    static const QHash<EndpointId, QString> endpointsIdStringHash = {
+        {E_SIGN_IN,                "signin"},
+        {E_GET_DAILY_QUOTE,        "getdailyquote"},
+        {E_GET_HOURLY_QUOTE,       "gethourlyquote"},
+        {E_CREATE_QUOTE,           "createquote"},
+        {E_CREATE_GRADE_FOR_QUOTE, "creategradeforquote"}
+    };
+    
+    return endpointsIdStringHash;
+}
+
+static const QString getStringByEndpointId(const EndpointId endpointId) {
     if (endpointId >= Endpoints::E_COUNT || endpointId == Endpoints::E_INVALID)
         return QString{};
     
-    static const QHash<EndpointId, QString> endpointsIdStringHash = {
-        {E_SIGN_IN,                "SignIn"},
-        {E_GET_DAILY_QUOTE,        "GetDailyQuote"},
-        {E_GET_HOURLY_QUOTE,       "GetHourlyQuote"},
-        {E_CREATE_QUOTE,           "CreateQuote"},
-        {E_CREATE_GRADE_FOR_QUOTE, "CreateGradeForQuote"}
-    };
+    return getEndpointStringHash().value(endpointId);
+}
+
+static const EndpointId getEndpointIdByStringHash(const QString &endpointString) {
+    if (endpointString.isEmpty()) return false;
     
-    return endpointsIdStringHash.value(endpointId);
+    EndpointId endpointId{getEndpointStringHash().key(endpointString)};
+    
+    return ((endpointId >= Endpoints::E_COUNT || endpointId <= Endpoints::E_INVALID)
+           ? Endpoints::E_INVALID : endpointId);
 }
 
 };

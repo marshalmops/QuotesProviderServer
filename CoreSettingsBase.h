@@ -39,4 +39,6 @@ protected:
     uint32_t                      m_tokenExpirationTime;
 };
 
+Q_DECLARE_METATYPE(std::shared_ptr<CoreSettingsBase>)
+
 #endif // CORESETTINGSBASE_H

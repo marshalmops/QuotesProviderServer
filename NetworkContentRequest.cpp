@@ -16,33 +16,53 @@ ServerContext::EndpointId NetworkContentRequest::getEndpointId() const
     return m_endpointId;
 }
 
-bool NetworkContentRequest::fromRawData(const ServerContext::RawData &rawData)
-{
-    if (rawData.length() < sizeof(ServerContext::EndpointId)) return false;
+//bool NetworkContentRequest::fromRawData(const ServerContext::RawData &rawData)
+//{
+//    if (rawData.length() < sizeof(ServerContext::EndpointId)) return false;
     
-    size_t curIndex = 0;
+//    size_t curIndex = 0;
     
-    auto rawEndpointId = rawData.substr(curIndex, sizeof(ServerContext::EndpointId));
+//    auto rawEndpointId = rawData.substr(curIndex, sizeof(ServerContext::EndpointId));
     
-    if (rawEndpointId.empty()) return false;
+//    if (rawEndpointId.empty()) return false;
     
-    curIndex += sizeof(ServerContext::EndpointId);
+//    curIndex += sizeof(ServerContext::EndpointId);
     
-    auto rawJsonBody = rawData.substr(curIndex);
+//    auto rawJsonBody = rawData.substr(curIndex);
     
-    auto endpointId = std::stoi(rawEndpointId);
-    auto jsonBody   = QJsonDocument::fromJson(QByteArray{rawJsonBody.data()}).object();
+//    auto endpointId = std::stoi(rawEndpointId);
+//    auto jsonBody   = QJsonDocument::fromJson(QByteArray{rawJsonBody.data()}).object();
     
-    if (endpointId == ServerContext::Endpoints::E_INVALID)
-        return false;
+//    if (endpointId == ServerContext::Endpoints::E_INVALID)
+//        return false;
     
-    m_endpointId = endpointId;
-    m_jsonBody   = jsonBody;
+//    m_endpointId = endpointId;
+//    m_jsonBody   = jsonBody;
     
-    return true;
-}
+//    return true;
+//}
 
 bool NetworkContentRequest::isValid() const
 {
     return (m_endpointId != ServerContext::Endpoints::E_INVALID);
+}
+
+bool NetworkContentRequest::fromRequestBase(const ServerContext::EndpointId endpoint,
+                                            const ServerContext::RawData &rawJson)
+{
+    if (endpoint == ServerContext::Endpoints::E_INVALID)
+        return false;
+    
+    if (!rawJson.empty()) {
+        auto jsonBody   = QJsonDocument::fromJson(QByteArray{rawJson.data()}).object();
+        
+        if (jsonBody.isEmpty())
+            return false;
+        
+        m_jsonBody = std::move(jsonBody);
+    }
+    
+    m_endpointId = endpoint;
+    
+    return true;
 }

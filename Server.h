@@ -26,6 +26,7 @@ public:
     
     explicit Server(const ServerContext::Port port = C_DEFAULT_PORT,
                     QObject *parent = nullptr);
+    ~Server();
     
     void start(const uint16_t workersCount);
     
@@ -40,6 +41,8 @@ signals:
     void networkStopped();
     
     void requestPassedToCore(std::shared_ptr<NetworkContentRequest> request);
+    
+    void stopWorkers();
 
 public slots:
     void stop();
@@ -58,6 +61,8 @@ private:
     
     bool   m_isRunning;
     size_t m_networkStopCounter;
+    
+    std::atomic_flag m_isAcceptingOnQueue;
 };
 
 #endif // SERVER_H

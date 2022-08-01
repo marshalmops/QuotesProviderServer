@@ -5,8 +5,13 @@
 #include <boost/asio/read_until.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/asio/streambuf.hpp>
+#include <boost/beast/http.hpp>
+#include <boost/beast/http/parser.hpp>
+#include <boost/beast/http/string_body.hpp>
+#include <boost/beast/http/serializer.hpp>
 
 #include "ServerContext.h"
+#include "Error.h"
 
 using namespace boost::asio;
 
@@ -19,11 +24,13 @@ public:
     ServerConnection() = delete;
     ServerConnection(ServerConnection &&other);
     ServerConnection(Socket &&socket);
+    ~ServerConnection();
     
     // reading and writing using buffer...
     
-    bool readData (ServerContext::RawData &readData);
-    bool writeData(const ServerContext::RawData &dataToWrite);
+    Error readData (std::unique_ptr<ServerContext::HttpRequest> &readData);
+    Error writeData(const std::unique_ptr<ServerContext::HttpResponse> &httpDataToWrite);
+    Error writeData(const ServerContext::RawData &dataToWrite);
     
 private:
     Socket m_socket;

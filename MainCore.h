@@ -25,6 +25,7 @@ public:
     explicit MainCore(const CoreContext::Id workersCount,
                       const CoreContext::Id otherThreadsCount,
                       QObject *parent = nullptr);
+    ~MainCore();
     
     bool launchWorkers();
     

@@ -47,7 +47,8 @@ bool DatabaseQueryParserStandard::parseSelectQuery(const DatabaseQueryStandardSe
     if (!query->getConditions().empty()) {
         QString conditionsString{conditionsListToString(query->getConditions())};
         
-        if (conditionsString.isEmpty()) return false;
+        if (conditionsString.isEmpty()) 
+            return false;
         
         sqlString += conditionsString;
     }
@@ -214,7 +215,7 @@ QString DatabaseQueryParserStandard::conditionsListToString(const DatabaseQueryU
         
         if (!curCondition) return QString{};
         
-        QString conditionValueString{variantValueToString(curCondition->getValue())};
+        QString conditionValueString{curCondition->toString()};
         
         if (conditionValueString.isEmpty()) return QString{};
         

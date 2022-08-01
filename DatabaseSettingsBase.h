@@ -49,4 +49,6 @@ protected:
     AdditionalPropsMap            m_additionalProps;
 };
 
+Q_DECLARE_METATYPE(std::shared_ptr<DatabaseSettingsBase>)
+
 #endif // DATABASESETTINGSBASE_H

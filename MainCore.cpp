@@ -14,6 +14,11 @@ MainCore::MainCore(const CoreContext::Id workersCount,
 {
                             
 }
+                            
+MainCore::~MainCore()
+{
+    qInfo() << "MainCore destruction";
+}
 
 bool MainCore::launchWorkers()
 {

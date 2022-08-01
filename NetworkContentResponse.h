@@ -19,7 +19,7 @@ public:
                            const ResponseProcessingCode code = RPC_INVALID,
                            const QJsonObject &jsonBody = QJsonObject());
     
-    virtual bool fromRawData(const ServerContext::RawData &rawData) override;
+    //virtual bool fromRawData(const ServerContext::RawData &rawData) override;
     bool toRawData(ServerContext::RawData &rawData);
     virtual bool isValid() const override;
     
@@ -28,5 +28,7 @@ public:
 protected:
     ResponseProcessingCode m_code;
 };
+
+Q_DECLARE_METATYPE(std::shared_ptr<NetworkContentResponse>)
 
 #endif // NETWORKCONTENTRESPONSE

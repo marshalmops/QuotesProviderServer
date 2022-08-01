@@ -5,8 +5,9 @@ Server::Server(const ServerContext::Port port,
     : QObject{parent},
       m_ioContext{},
       m_acceptor {m_ioContext},
-      m_networkStopCounter{},
-      m_isRunning{false}
+      m_isRunning{false},
+      m_networkStopCounter{0},
+      m_isAcceptingOnQueue{ATOMIC_FLAG_INIT}
 {
     ip::tcp::endpoint endpoint{ip::tcp::endpoint::protocol_type::v4(), port};
     
@@ -18,6 +19,11 @@ Server::Server(const ServerContext::Port port,
     //acceptConnectionAsync();
     
     // workers creation...
+}
+
+Server::~Server()
+{
+    qInfo() << "Server destruction";
 }
 
 void Server::start(const uint16_t workersCount)
@@ -48,9 +54,11 @@ void Server::launchWorkers(const uint16_t workersCount)
 {
     for (uint16_t i = 0; i < workersCount; ++i) {
         QThread *newThread = new QThread{};
-        std::shared_ptr<ServerWorker> newWorker = std::make_shared<ServerWorker>(i, &m_ioContext, &m_acceptor);
+        std::shared_ptr<ServerWorker> newWorker = std::make_shared<ServerWorker>(i, &m_ioContext, &m_acceptor, m_isAcceptingOnQueue);
         
         newWorker->moveToThread(newThread);
+        
+        connect(this, &Server::stopWorkers, newWorker.get(), &ServerWorker::stop, Qt::QueuedConnection);
         
         connect(newThread, &QThread::started, newWorker.get(), &ServerWorker::start);
         
@@ -65,7 +73,9 @@ void Server::launchWorkers(const uint16_t workersCount)
 
 void Server::stop()
 {
-    m_ioContext.stop();
+    //m_ioContext.stop();
+    
+    emit stopWorkers();
     
 //    for (auto i = m_serverWorkers.begin(); i != m_serverWorkers.end(); ++i)
 //        (*i)->stop();
@@ -79,6 +89,9 @@ void Server::processWorkerStop()
         return;
     
     m_isRunning = false;
+    
+    m_ioContext.stop();
+    QThread::currentThread()->quit();
 }
 
 //void Server::acceptConnectionAsync()

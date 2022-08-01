@@ -25,10 +25,8 @@ protected:
         
         if (!m_slots) return false;
         
-        auto newSlotsIndex = 0;
-        
-        for (auto prevSlotsIter = prevSlots; prevSlotsIter < prevSlotsIter + prevSize; ++prevSlotsIter, ++newSlotsIndex) {
-            m_slots[newSlotsIndex] = *prevSlotsIter;
+        for (auto prevSlotsIndex = 0; prevSlotsIndex < prevSize; ++prevSlotsIndex) {
+            m_slots[prevSlotsIndex] = *(prevSlots + prevSlotsIndex);
         }
         
         delete []prevSlots;
@@ -38,7 +36,7 @@ protected:
     
 public:
     SlotsArray()
-        : m_slots{},
+        : m_slots(new SlotArrayItem<T>*[C_START_SIZE]),
           m_size {C_START_SIZE}
     {
         

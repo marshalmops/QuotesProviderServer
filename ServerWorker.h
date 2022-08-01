@@ -2,6 +2,8 @@
 #define SERVERWORKER_H
 
 #include <QObject>
+#include <QAbstractEventDispatcher>
+#include <QThread>
 #include <vector>
 #include <atomic>
 #include <boost/asio/ip/tcp.hpp>
@@ -12,7 +14,7 @@
 #include "SlotsArray.h"
 #include "ServerConnection.h"
 
-#include "NetworkHttpResponseCreator.h"
+#include "NetworkHttpPacketProcessor.h"
 
 #include "NetworkContentResponse.h"
 #include "NetworkContentRequest.h"
@@ -29,16 +31,22 @@ public:
     ServerWorker(const ServerContext::WorkerId workerId,
                  io_context *ioContextPtr,
                  ip::tcp::acceptor *acceptorPtr,
+                 std::atomic_flag &isAcceptingOnQueue,
                  //ThreadedQueue<ServerContext::Socket>* newClientsSocketsPtr,
                  QObject *parent = nullptr);
+    ~ServerWorker();
     
     void start();
     //void stop();
     
     void processResponse(std::shared_ptr<NetworkContentResponse> &response);
     
+public slots:
+    void stop();
+    
 protected:
     void acceptConnectionAsync();
+    void retryAcceptConnection();
     //ServerContext::SocketId addNewConnection(ServerConnection &&connection);
     
 signals:
@@ -58,9 +66,11 @@ private:
     io_context        *m_ioContextPtr;
     ip::tcp::acceptor *m_acceptorPtr;
     
-    std::unique_ptr<NetworkHttpResponseCreator> m_httpResponseCreator;
+    std::unique_ptr<NetworkHttpPacketProcessor> m_httpPacketProcessor;
     
-    //std::atomic<bool> m_runningFlag;
+    std::atomic_flag &m_isAcceptingOnQueue;
+    
+    bool m_runningFlag;
 };
 
 #endif // SERVERWORKER_H

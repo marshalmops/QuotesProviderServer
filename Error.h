@@ -2,6 +2,7 @@
 #define ERROR_H
 
 #include <string>
+#include <QMetaType>
 
 class Error
 {
@@ -20,5 +21,7 @@ private:
     String m_text;
     bool   m_isCritical;
 };
+
+Q_DECLARE_METATYPE(Error)
 
 #endif // ERROR_H
