@@ -3,7 +3,8 @@
 
 #include <vector>
 #include <algorithm>
-#include <memory>
+#include <memory> 
+#include <QDebug>
 
 #include "SlotArrayItem.h"
 
@@ -29,6 +30,9 @@ protected:
             m_slots[prevSlotsIndex] = *(prevSlots + prevSlotsIndex);
         }
         
+        for (auto i = prevSize; i < m_size; ++i)
+            m_slots[i] = nullptr;
+        
         delete []prevSlots;
         
         return true;
@@ -39,14 +43,19 @@ public:
         : m_slots(new SlotArrayItem<T>*[C_START_SIZE]),
           m_size {C_START_SIZE}
     {
-        
+        for (auto i = 0; i < m_size; ++i)
+            m_slots[i] = nullptr;
     }
     
     ~SlotsArray()
     {
-        for (auto i = m_slots; i < m_slots + m_size; ++i) {
-            if (i  == nullptr) break;
-            if (*i != nullptr) delete (*i);
+        if (m_slots == nullptr)
+            return;
+        
+        for (auto i = 0; i < m_size; ++i) {
+            if (m_slots[i]  == nullptr) continue;
+            
+            delete (m_slots[i]);
         }
         
         if (m_slots) delete[] m_slots;
@@ -56,8 +65,9 @@ public:
     {
         auto curIndex = 0;
         
-        for (auto slotsIter = m_slots; slotsIter < m_slots + m_size; ++slotsIter, ++curIndex) {
-            if (!(*slotsIter)) return (*slotsIter = new SlotArrayItem<T>{curIndex, std::move(item)});
+        for (auto i = 0; i < m_size; ++i, ++curIndex) {
+            if (!(m_slots[i])) 
+                return (m_slots[i] = new SlotArrayItem<T>{i, std::move(item)});
         }
         
         if (!expandSlots()) return nullptr;
@@ -80,7 +90,13 @@ public:
         
         delete m_slots[index];
         
+        m_slots[index] = nullptr;
+        
         return true;
+    }
+    
+    size_t size() const {
+        return m_size;
     }
     
 private:

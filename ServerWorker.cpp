@@ -22,10 +22,6 @@ ServerWorker::ServerWorker(//ThreadedQueue<ServerContext::Socket> *newClientsSoc
 
 ServerWorker::~ServerWorker()
 {
-    m_connections.~SlotsArray();
-            
-    emit stopped();
-    
     qInfo() << "Worker destruction";
 }
 
@@ -52,7 +48,7 @@ void ServerWorker::start()
             return;
         }
         
-        SlotArrayItem<ServerConnection> *socketSlotArrayItemPtr;
+        SlotArrayItem<ServerConnection> *socketSlotArrayItemPtr{nullptr};
         
         if (!(socketSlotArrayItemPtr = m_connections.getItem(response->getSocketId()))) {
             emit errorOccured(Error{tr("Requested socket doesn't exist!").toStdString(), true});
@@ -144,6 +140,16 @@ void ServerWorker::stop()
     m_runningFlag = false;
     
     QThread::currentThread()->quit();
+    
+    for (auto i = 0; i < m_connections.size(); ++i) {
+        auto curConnectionPtr = m_connections.getItem(i);
+        
+        if (!curConnectionPtr) continue;
+        
+        curConnectionPtr->getValue().close();
+    }
+            
+    emit stopped();
 }
 
 //ServerContext::SocketId ServerWorker::addNewConnection(ServerConnection &&connection)

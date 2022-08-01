@@ -24,13 +24,15 @@ public:
     ServerConnection() = delete;
     ServerConnection(ServerConnection &&other);
     ServerConnection(Socket &&socket);
-    ~ServerConnection();
+    ~ServerConnection() = default;
     
     // reading and writing using buffer...
     
     Error readData (std::unique_ptr<ServerContext::HttpRequest> &readData);
     Error writeData(const std::unique_ptr<ServerContext::HttpResponse> &httpDataToWrite);
     Error writeData(const ServerContext::RawData &dataToWrite);
+    
+    void close();
     
 private:
     Socket m_socket;

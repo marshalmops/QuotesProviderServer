@@ -6,6 +6,8 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     
+    a.setQuitOnLastWindowClosed(false);
+    
     std::unique_ptr<AppView>  appView {};
     std::unique_ptr<MainCore> mainCore{};
     std::unique_ptr<Server>   server  {};

@@ -7,12 +7,6 @@ ServerConnection::ServerConnection(Socket &&socket)
     
 }
 
-ServerConnection::~ServerConnection()
-{
-    if (m_socket.is_open())
-        m_socket.close();
-}
-
 ServerConnection::ServerConnection(ServerConnection &&other)
     : m_socket{std::move(other.m_socket)},
       m_buffer{}
@@ -81,4 +75,10 @@ Error ServerConnection::writeData(const ServerContext::RawData &dataToWrite)
 //    return true;
     
     return Error{};
+}
+
+void ServerConnection::close()
+{
+    if (m_socket.is_open())
+        m_socket.close();
 }
