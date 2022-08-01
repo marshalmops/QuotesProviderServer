@@ -1,6 +1,9 @@
 #ifndef DATABASEQUERYPARSERSTANDARD_H
 #define DATABASEQUERYPARSERSTANDARD_H
 
+#include <QDateTime>
+#include <QDate>
+
 #include "DatabaseQueryParserInterface.h"
 
 #include "DatabaseQueryStandardSelect.h"

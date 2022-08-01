@@ -1,19 +1,19 @@
 #ifndef DATABASEQUERYRESULTSTANDARD_H
 #define DATABASEQUERYRESULTSTANDARD_H
 
-#include <QSqlQuery>
+#include <QSqlRecord>
 
 #include "DatabaseQueryResultBase.h"
 
 class DatabaseQueryResultStandard : public DatabaseQueryResultBase
 {
 public:
-    DatabaseQueryResultStandard(const QSqlQuery &sqlResult);
+    DatabaseQueryResultStandard(const QSqlRecord &sqlResult);
     
-    const QSqlQuery& getSqlResult() const;
+    const QSqlRecord& getSqlResult() const;
     
 protected:
-    QSqlQuery m_sqlResult;
+    QSqlRecord m_sqlResult;
 };
 
 #endif // DATABASEQUERYRESULTSTANDARD_H

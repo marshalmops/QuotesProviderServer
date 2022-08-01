@@ -19,7 +19,7 @@ bool DatabaseDriverStandard::executeRawQuery(const QString &rawQuery,
 {
     QSqlDatabase db       {QSqlDatabase::database(m_connectionName)};
     QSqlQuery    rawResult{db.exec(rawQuery)};
-    auto i = rawResult.lastError().type();
+
     if (rawResult.lastError().type() != QSqlError::NoError)
         return false;
     
@@ -28,10 +28,14 @@ bool DatabaseDriverStandard::executeRawQuery(const QString &rawQuery,
     while (rawResult.next()) {
         if (!rawResult.isValid()) return false;
         
-        resultsBuffer.push_back(std::make_shared<DatabaseQueryResultStandard>(rawResult));
+        resultsBuffer.push_back(std::make_shared<DatabaseQueryResultStandard>(rawResult.record()));
     }
     
     results = std::move(resultsBuffer);
+    
+//    auto i1 = rawResult.record().value(0);
+//    auto i2 = rawResult.record().value(1);
+//    auto i3 = rawResult.record().value(2);
     
     return true;
 }

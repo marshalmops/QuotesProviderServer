@@ -62,7 +62,7 @@ bool CoreEntityProcessorBase::quoteToJSON(const EntityQuote * const quote,
     jsonObjectBuffer[EntityQuote::C_AUTHOR_PROP_NAME]             = quote->getAuthor();
     jsonObjectBuffer[EntityQuote::C_RATING_PROP_NAME]             = quote->getRating();
     jsonObjectBuffer[EntityQuote::C_CREATOR_ID_PROP_NAME]         = QJsonValue::fromVariant(QVariant{quote->getCreatorId()});
-    jsonObjectBuffer[EntityQuote::C_CREATION_DATE_TIME_PROP_NAME] = quote->getCreationDateTime().toString();
+    jsonObjectBuffer[EntityQuote::C_CREATION_DATE_TIME_PROP_NAME] = quote->getCreationDateTime().toString(Qt::ISODate);
     
     if (jsonObjectBuffer.isEmpty()) return false;
     
@@ -80,8 +80,8 @@ bool CoreEntityProcessorBase::sessionToJSON(const EntitySession * const session,
     
     jsonObjectBuffer[EntitySession::C_ID_PROP_NAME]                   = QJsonValue::fromVariant(QVariant{session->getUserId()});
     jsonObjectBuffer[EntitySession::C_TOKEN_PROP_NAME]                = session->getToken();
-    jsonObjectBuffer[EntitySession::C_CREATION_DATE_TIME_PROP_NAME]   = session->getCreationDateTime().toString();
-    jsonObjectBuffer[EntitySession::C_EXPIRATION_DATE_TIME_PROP_NAME] = session->getExpirationDateTime().toString();
+    jsonObjectBuffer[EntitySession::C_CREATION_DATE_TIME_PROP_NAME]   = session->getCreationDateTime().toString(Qt::ISODate);
+    jsonObjectBuffer[EntitySession::C_EXPIRATION_DATE_TIME_PROP_NAME] = session->getExpirationDateTime().toString(Qt::ISODate);
     
     if (jsonObjectBuffer.isEmpty()) return false;
     

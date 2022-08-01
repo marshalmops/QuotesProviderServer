@@ -499,7 +499,7 @@ DatabaseContext::DatabaseOperationResult DatabaseFacadeStandard::getQueryResultP
     
     auto sqlResult = queryResult->getSqlResult();
     
-    if (!sqlResult.isValid()) 
+    if (sqlResult.isEmpty()) 
         return DatabaseContext::DatabaseOperationResult::DOR_ERROR;
     
     QVariant propValueBuffer{};

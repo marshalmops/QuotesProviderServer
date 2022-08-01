@@ -1,12 +1,12 @@
 #include "DatabaseQueryResultStandard.h"
 
-DatabaseQueryResultStandard::DatabaseQueryResultStandard(const QSqlQuery &sqlResult)
+DatabaseQueryResultStandard::DatabaseQueryResultStandard(const QSqlRecord &sqlResult)
     : m_sqlResult{sqlResult}
 {
     
 }
 
-const QSqlQuery &DatabaseQueryResultStandard::getSqlResult() const
+const QSqlRecord &DatabaseQueryResultStandard::getSqlResult() const
 {
     return m_sqlResult;
 }
