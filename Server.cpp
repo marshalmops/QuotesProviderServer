@@ -92,6 +92,8 @@ void Server::processWorkerStop()
     
     m_ioContext.stop();
     QThread::currentThread()->quit();
+    
+    m_serverWorkers.clear();
 }
 
 //void Server::acceptConnectionAsync()

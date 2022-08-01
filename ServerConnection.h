@@ -30,12 +30,11 @@ public:
     
     Error readData (std::unique_ptr<ServerContext::HttpRequest> &readData);
     Error writeData(const std::unique_ptr<ServerContext::HttpResponse> &httpDataToWrite);
-    Error writeData(const ServerContext::RawData &dataToWrite);
     
     void close();
     
 private:
-    Socket m_socket;
+    std::unique_ptr<Socket> m_socket;
     Buffer m_buffer;
 };
 

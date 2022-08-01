@@ -232,6 +232,8 @@ bool MainCoreWorker::processQuoteCreation(const std::shared_ptr<NetworkContentRe
         return false;
     else if (operationResultCode == DatabaseContext::DatabaseOperationResult::DOR_NOT_FOUND) {
         sendResponseByOperationCode(operationResultCode, request);
+        
+        return true;
     }
     
     if (!session->isValid()) return false;
