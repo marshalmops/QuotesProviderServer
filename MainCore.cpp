@@ -55,6 +55,9 @@ bool MainCore::launchWorkers()
 
     emit databaseFacadeRecreationRequested();
     
+    changeHourlyQuote();
+    changeDailyQuote();
+
     // timers creation:
     
     QTimer *changeDailyQuoteTimer {new QTimer{this}};

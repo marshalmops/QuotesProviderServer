@@ -139,12 +139,11 @@ bool DatabaseEntityProcessorSQL::getEntityQuoteByDatabaseQueryResult(const std::
     auto textRawValue             = sqlRecord.value(EntityQuote::C_TEXT_PROP_NAME);
     auto textHashRawValue         = sqlRecord.value(EntityQuote::C_TEXT_HASH_PROP_NAME);
     auto authorRawValue           = sqlRecord.value(EntityQuote::C_AUTHOR_PROP_NAME);
-    auto ratingRawValue           = sqlRecord.value(EntityQuote::C_RATING_PROP_NAME);
     auto creatorIdRawValue        = sqlRecord.value(EntityQuote::C_CREATOR_ID_PROP_NAME);
     auto creationDateTimeRawValue = sqlRecord.value(EntityQuote::C_CREATION_DATE_TIME_PROP_NAME);
     
     if (idRawValue.isNull() || textRawValue.isNull() || textHashRawValue.isNull() || authorRawValue.isNull()
-     || ratingRawValue.isNull() || creatorIdRawValue.isNull() || creationDateTimeRawValue.isNull())
+     || creatorIdRawValue.isNull() || creationDateTimeRawValue.isNull())
     {
         return false;
     }
@@ -161,10 +160,6 @@ bool DatabaseEntityProcessorSQL::getEntityQuoteByDatabaseQueryResult(const std::
     
     if (text.isEmpty() || author.isEmpty() || textHash.isEmpty()) return false;
     
-    EntityQuote::Rating rating{ratingRawValue.toLongLong(&isConvOK)};
-    
-    if (!isConvOK) return false;
-    
     CoreContext::Id creatorId{creatorIdRawValue.toULongLong(&isConvOK)};
     
     if (!isConvOK) return false;
@@ -173,7 +168,7 @@ bool DatabaseEntityProcessorSQL::getEntityQuoteByDatabaseQueryResult(const std::
     
     if (!creationDateTime.isValid()) return false;
     
-    auto newQuote = std::make_shared<EntityQuote>(text, author, textHash, creationDateTime, creatorId, id, rating);
+    auto newQuote = std::make_shared<EntityQuote>(text, author, textHash, creationDateTime, creatorId, id);
     
     if (!newQuote->isValid()) return false;
     

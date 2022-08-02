@@ -15,6 +15,7 @@ public:
     virtual ~DatabaseDriverBase() = default;
     
     virtual bool initializeConnection() = 0;
+    
     virtual bool executeQuery(const std::unique_ptr<DatabaseQueryBase> &query,
                               std::vector<std::shared_ptr<DatabaseQueryResultBase>> &results) = 0;
     virtual bool executeRawQuery(const QString &rawQuery,

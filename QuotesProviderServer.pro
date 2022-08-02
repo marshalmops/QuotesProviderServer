@@ -30,6 +30,7 @@ SOURCES += \
         DatabaseEntityProcessorInterface.cpp \
         DatabaseEntityProcessorSQL.cpp \
         DatabaseFacadeBase.cpp \
+        DatabaseFacadeSQLite.cpp \
         DatabaseFacadeStandard.cpp \
         DatabaseLayerCreator.cpp \
         DatabaseQueryBase.cpp \
@@ -59,6 +60,7 @@ SOURCES += \
         Error.cpp \
         FilesProcessor.cpp \
         FilesProcessorSettings.cpp \
+        HashingGenerator.cpp \
         MainCore.cpp \
         MainCoreWorker.cpp \
         NetworkContentBase.cpp \
@@ -68,7 +70,6 @@ SOURCES += \
         Server.cpp \
         ServerConnection.cpp \
         ServerWorker.cpp \
-        SessionTokenGenerator.cpp \
         SettingsContainerBase.cpp \
         SettingsContainerEditable.cpp \
         SettingsEditor.cpp \
@@ -102,6 +103,7 @@ HEADERS += \
     DatabaseEntityProcessorInterface.h \
     DatabaseEntityProcessorSQL.h \
     DatabaseFacadeBase.h \
+    DatabaseFacadeSQLite.h \
     DatabaseFacadeStandard.h \
     DatabaseLayerCreator.h \
     DatabaseQueryBase.h \
@@ -131,6 +133,7 @@ HEADERS += \
     Error.h \
     FilesProcessor.h \
     FilesProcessorSettings.h \
+    HashingGenerator.h \
     MainCore.h \
     MainCoreWorker.h \
     NetworkContentBase.h \
@@ -141,7 +144,6 @@ HEADERS += \
     ServerConnection.h \
     ServerContext.h \
     ServerWorker.h \
-    SessionTokenGenerator.h \
     SettingsContainerBase.h \
     SettingsContainerEditable.h \
     SettingsEditor.h \

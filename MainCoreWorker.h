@@ -23,7 +23,7 @@
 #include "DatabaseLayerCreator.h"
 #include "DatabaseFacadeBase.h"
 
-#include "SessionTokenGenerator.h"
+#include "HashingGenerator.h"
 
 class MainCoreWorker : public QObject
 {
@@ -78,6 +78,9 @@ private:
     void sendResponseByOperationCode(const DatabaseContext::DatabaseOperationResult result,
                                      const std::shared_ptr<NetworkContentRequest> &request,
                                      const QJsonObject &jsonBody = QJsonObject{});
+    void sendResponseByNetworkProcessingCode(const NetworkContentResponse::ResponseProcessingCode result,
+                                             const std::shared_ptr<NetworkContentRequest> &request,
+                                             const QJsonObject &jsonBody = QJsonObject{});
     
 private:
     std::shared_ptr<EntityQuote> m_hourlyQuote;

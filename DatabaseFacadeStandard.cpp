@@ -22,54 +22,6 @@ bool DatabaseFacadeStandard::testDatabaseCorrectness()
     return driver->checkTablesOnExisting(tables);
 }
 
-bool DatabaseFacadeStandard::initializeTables()
-{
-    QString creationQueryString{};
-    std::vector<std::shared_ptr<DatabaseQueryResultBase>> results{};
-    
-    creationQueryString += QString("CREATE TABLE ") + EntityGrade::C_GRADE_TABLE_NAME + '(';
-    creationQueryString += QString(EntityGrade::C_QUOTE_ID_PROP_NAME) + " INT NOT NULL,";
-    creationQueryString += QString(EntityGrade::C_DEVICE_HASH_PROP_NAME) + " VARCHAR(511) NOT NULL,";
-    creationQueryString += QString(EntityGrade::C_GRADE_PROP_NAME) + " INT NOT NULL);";
-    
-    if (!m_driver->executeRawQuery(creationQueryString, results))
-        return false;
-    
-    creationQueryString.clear();
-    
-    creationQueryString += QString("CREATE TABLE ") + EntityQuote::C_QUOTE_TABLE_NAME + '(';
-    creationQueryString += QString(EntityQuote::C_ID_PROP_NAME) + " INT NOT NULL PRIMARY KEY,";
-    creationQueryString += QString(EntityQuote::C_TEXT_PROP_NAME) + " NVARCHAR(2047) NOT NULL,";
-    creationQueryString += QString(EntityQuote::C_TEXT_HASH_PROP_NAME) + " VARCHAR(511) NOT NULL,";
-    creationQueryString += QString(EntityQuote::C_AUTHOR_PROP_NAME) + " NVARCHAR(511) NOT NULL,";
-    creationQueryString += QString(EntityQuote::C_RATING_PROP_NAME) + " INT NOT NULL,";
-    creationQueryString += QString(EntityQuote::C_CREATOR_ID_PROP_NAME) + " INT NOT NULL,";    
-    creationQueryString += QString(EntityQuote::C_CREATION_DATE_TIME_PROP_NAME) + " DATE NOT NULL);";
-    
-    if (!m_driver->executeRawQuery(creationQueryString, results))
-        return false;
-    
-    creationQueryString.clear();
-    
-    creationQueryString += QString("CREATE TABLE ") + EntitySession::C_SESSION_TABLE_NAME + '(';
-    creationQueryString += QString(EntitySession::C_ID_PROP_NAME) + " INT NOT NULL,";
-    creationQueryString += QString(EntitySession::C_TOKEN_PROP_NAME) + " VARCHAR(511) NOT NULL,";
-    creationQueryString += QString(EntitySession::C_CREATION_DATE_TIME_PROP_NAME) + " DATE NOT NULL,";    
-    creationQueryString += QString(EntitySession::C_EXPIRATION_DATE_TIME_PROP_NAME) + " DATE NOT NULL);";
-    
-    if (!m_driver->executeRawQuery(creationQueryString, results))
-        return false;
-    
-    creationQueryString.clear();
-    
-    creationQueryString += QString("CREATE TABLE ") + EntityUser::C_USER_TABLE_NAME + '(';
-    creationQueryString += QString(EntityUser::C_ID_PROP_NAME) + " INT NOT NULL PRIMARY KEY,";
-    creationQueryString += QString(EntityUser::C_EMAIL_PROP_NAME) + " VARCHAR(127) NOT NULL,";
-    creationQueryString += QString(EntityUser::C_PASSWORD_PROP_NAME) + " NVARCHAR(127) NOT NULL);";
-    
-    return (m_driver->executeRawQuery(creationQueryString, results));
-}
-
 DatabaseContext::DatabaseOperationResult DatabaseFacadeStandard::createUserSession(const std::unique_ptr<EntityUser> &userData, 
                                                                                    const std::unique_ptr<EntitySession> &sessionData,
                                                                                    std::unique_ptr<EntitySession> &createdSession)
@@ -107,26 +59,63 @@ DatabaseContext::DatabaseOperationResult DatabaseFacadeStandard::createUserSessi
     if (!curUser->isValid()) 
         return DatabaseContext::DatabaseOperationResult::DOR_ERROR;
     
-    // session creation:
+    // session searching by user_id:
     
-    QStringList insertingSessionAttributes{EntitySession::C_ID_PROP_NAME,
-                                           EntitySession::C_TOKEN_PROP_NAME, 
-                                           EntitySession::C_CREATION_DATE_TIME_PROP_NAME,
-                                           EntitySession::C_EXPIRATION_DATE_TIME_PROP_NAME};
+    auto selectingSessionByUserIdCondition = std::make_shared<DatabaseQueryConditionStandard>(DatabaseQueryContextStandard::DatabaseQueryConditionType::DQCT_EQUAL_TO, EntitySession::C_ID_PROP_NAME, curUser->getId());
     
-    DatabaseQueryStandardInsert::ValuesList insertingSessionValues{curUser->getId(),
-                                                                   sessionData->getToken(),
-                                                                   sessionData->getCreationDateTime(),
-                                                                   sessionData->getExpirationDateTime()};
+    std::unique_ptr<DatabaseQueryBase> selectSessionQuery{std::make_unique<DatabaseQueryStandardSelect>(QStringList{EntitySession::C_SESSION_TABLE_NAME},
+                                                                                                        QStringList{},
+                                                                                                        DatabaseQueryStandardSelect::ConditionsList{selectingSessionByUserIdCondition})};
+    std::vector<std::shared_ptr<DatabaseQueryResultBase>> selectSessionResults{};
     
-    std::unique_ptr<DatabaseQueryBase> insertSessionQuery{std::make_unique<DatabaseQueryStandardInsert>(EntitySession::C_SESSION_TABLE_NAME, 
-                                                                                                        insertingSessionValues, 
-                                                                                                        insertingSessionAttributes)};
-     
-    std::vector<std::shared_ptr<DatabaseQueryResultBase>> insertResults{};
-    
-    if (!m_driver->executeQuery(insertSessionQuery, insertResults))
+    if (!m_driver->executeQuery(selectSessionQuery, selectSessionResults))
         return DatabaseContext::DatabaseOperationResult::DOR_ERROR;
+    
+    if (selectSessionResults.empty()) {
+        // session creation:
+    
+        QStringList insertingSessionAttributes{EntitySession::C_ID_PROP_NAME,
+                    EntitySession::C_TOKEN_PROP_NAME, 
+                    EntitySession::C_CREATION_DATE_TIME_PROP_NAME,
+                    EntitySession::C_EXPIRATION_DATE_TIME_PROP_NAME};
+        
+        DatabaseQueryStandardInsert::ValuesList insertingSessionValues{curUser->getId(),
+                    sessionData->getToken(),
+                    sessionData->getCreationDateTime(),
+                    sessionData->getExpirationDateTime()};
+        
+        std::unique_ptr<DatabaseQueryBase> insertSessionQuery{std::make_unique<DatabaseQueryStandardInsert>(EntitySession::C_SESSION_TABLE_NAME, 
+                                                                                                            insertingSessionValues, 
+                                                                                                            insertingSessionAttributes)};
+        
+        std::vector<std::shared_ptr<DatabaseQueryResultBase>> insertResults{};
+        
+        if (!m_driver->executeQuery(insertSessionQuery, insertResults))
+            return DatabaseContext::DatabaseOperationResult::DOR_ERROR;
+    
+    } else {
+        // session update by id:
+        
+        auto updatingSessionByUserIdCondition = std::make_shared<DatabaseQueryConditionStandard>(DatabaseQueryContextStandard::DatabaseQueryConditionType::DQCT_EQUAL_TO, EntitySession::C_ID_PROP_NAME, curUser->getId());
+        
+        QStringList updatingSessionAttributes{EntitySession::C_TOKEN_PROP_NAME, 
+                    EntitySession::C_CREATION_DATE_TIME_PROP_NAME,
+                    EntitySession::C_EXPIRATION_DATE_TIME_PROP_NAME};
+        
+        DatabaseQueryStandardUpdate::ValuesList updatingSessionValues{sessionData->getToken(),
+                    sessionData->getCreationDateTime(),
+                    sessionData->getExpirationDateTime()};
+        
+        std::unique_ptr<DatabaseQueryBase> updateSessionQuery{std::make_unique<DatabaseQueryStandardUpdate>(QStringList{EntitySession::C_SESSION_TABLE_NAME}, 
+                                                                                                            updatingSessionAttributes,
+                                                                                                            updatingSessionValues,
+                                                                                                            DatabaseQueryStandardSelect::ConditionsList{updatingSessionByUserIdCondition})};
+        
+        std::vector<std::shared_ptr<DatabaseQueryResultBase>> updateResults{};
+        
+        if (!m_driver->executeQuery(updateSessionQuery, updateResults))
+            return DatabaseContext::DatabaseOperationResult::DOR_ERROR;
+    }
     
     // selecting inserted session: MB NOT?
     
@@ -202,14 +191,12 @@ DatabaseContext::DatabaseOperationResult DatabaseFacadeStandard::createQuote(con
     QStringList insertingQuoteAttributes{EntityQuote::C_TEXT_PROP_NAME,
                                          EntityQuote::C_TEXT_HASH_PROP_NAME,
                                          EntityQuote::C_AUTHOR_PROP_NAME,
-                                         EntityQuote::C_RATING_PROP_NAME,
                                          EntityQuote::C_CREATOR_ID_PROP_NAME,
                                          EntityQuote::C_CREATION_DATE_TIME_PROP_NAME};
     
     DatabaseQueryStandardInsert::ValuesList insertingQuoteValues{quoteData->getText(),
                                                                  quoteData->getTextHash(),
                                                                  quoteData->getAuthor(),
-                                                                 quoteData->getRating(),
                                                                  curUser->getId(),
                                                                  quoteData->getCreationDateTime()};
     
@@ -226,11 +213,11 @@ DatabaseContext::DatabaseOperationResult DatabaseFacadeStandard::createQuote(con
     
     auto selectingQuoteByIdCondition               = std::make_shared<DatabaseQueryConditionStandard>(DatabaseQueryContextStandard::DatabaseQueryConditionType::DQCT_EQUAL_TO, EntityQuote::C_CREATOR_ID_PROP_NAME,         curUser->getId());
     auto selectingQuoteByTextCondition             = std::make_shared<DatabaseQueryConditionStandard>(DatabaseQueryContextStandard::DatabaseQueryConditionType::DQCT_EQUAL_TO, EntityQuote::C_TEXT_PROP_NAME,               quoteData->getText());
-    auto selectingQuoteByCreationDataTimeCondition = std::make_shared<DatabaseQueryConditionStandard>(DatabaseQueryContextStandard::DatabaseQueryConditionType::DQCT_EQUAL_TO, EntityQuote::C_CREATION_DATE_TIME_PROP_NAME, quoteData->getCreationDateTime());
+    auto selectingQuoteByCreationDateTimeCondition = std::make_shared<DatabaseQueryConditionStandard>(DatabaseQueryContextStandard::DatabaseQueryConditionType::DQCT_EQUAL_TO, EntityQuote::C_CREATION_DATE_TIME_PROP_NAME, quoteData->getCreationDateTime());
     
     std::unique_ptr<DatabaseQueryBase> selectQuoteQuery{std::make_unique<DatabaseQueryStandardSelect>(QStringList{EntityQuote::C_QUOTE_TABLE_NAME},
                                                                                                       QStringList{},
-                                                                                                      DatabaseQueryStandardSelect::ConditionsList{selectingQuoteByIdCondition, selectingQuoteByTextCondition, selectingQuoteByCreationDataTimeCondition})};
+                                                                                                      DatabaseQueryStandardSelect::ConditionsList{selectingQuoteByIdCondition, selectingQuoteByTextCondition, selectingQuoteByCreationDateTimeCondition})};
     std::vector<std::shared_ptr<DatabaseQueryResultBase>> selectQuoteResults{};
     
     if (!m_driver->executeQuery(selectQuoteQuery, selectQuoteResults))
@@ -292,7 +279,45 @@ DatabaseContext::DatabaseOperationResult DatabaseFacadeStandard::getQuoteById(co
     if (!curQuote->isValid()) 
         return DatabaseContext::DatabaseOperationResult::DOR_ERROR;
     
-    gottenQuote = std::make_unique<EntityQuote>(std::move(*curQuote));
+    // getting quote rating...
+    
+    auto selectingQuoteGradesByIdCondition = std::make_shared<DatabaseQueryConditionStandard>(DatabaseQueryContextStandard::DatabaseQueryConditionType::DQCT_EQUAL_TO, 
+                                                                                              EntityGrade::C_QUOTE_ID_PROP_NAME, 
+                                                                                              quoteId);
+    
+    std::unique_ptr<DatabaseQueryBase> selectQuoteRatingQuery{std::make_unique<DatabaseQueryStandardSelect>(QStringList{EntityGrade::C_GRADE_TABLE_NAME},
+                                                                                                            QStringList{QString{"SUM("} + EntityGrade::C_GRADE_PROP_NAME + ") AS " + EntityQuote::C_RATING},
+                                                                                                            DatabaseQueryStandardSelect::ConditionsList{selectingQuoteGradesByIdCondition})};
+    std::vector<std::shared_ptr<DatabaseQueryResultBase>> selectQuoteRatingResults{};
+    
+    if (!m_driver->executeQuery(selectQuoteRatingQuery, selectQuoteRatingResults))
+        return DatabaseContext::DatabaseOperationResult::DOR_ERROR;
+    if (selectQuoteResults.empty()) 
+        return DatabaseContext::DatabaseOperationResult::DOR_NOT_FOUND;
+    
+    DatabaseQueryResultStandard *quoteRatingResult{dynamic_cast<DatabaseQueryResultStandard *>(selectQuoteRatingResults.front().get())};
+    QVariant quoteRatingRawValue{};
+    DatabaseContext::DatabaseOperationResult ratingGettingOperationResult{getQueryResultPropValue(quoteRatingResult, EntityQuote::C_RATING, quoteRatingRawValue)};
+    
+    if (ratingGettingOperationResult == DatabaseContext::DatabaseOperationResult::DOR_ERROR)
+        return ratingGettingOperationResult;
+    else if (ratingGettingOperationResult == DatabaseContext::DatabaseOperationResult::DOR_NOT_FOUND)
+        quoteRatingRawValue = 0;
+    
+    bool isConvOK{false};
+    
+    EntityQuote::Rating quoteRatingBuffer{quoteRatingRawValue.toLongLong(&isConvOK)};
+    
+    if (!isConvOK) 
+        return DatabaseContext::DatabaseOperationResult::DOR_ERROR;
+    
+    gottenQuote = std::make_unique<EntityQuote>(curQuote->getText(),
+                                                curQuote->getAuthor(),
+                                                curQuote->getTextHash(),
+                                                curQuote->getCreationDateTime(),
+                                                curQuote->getCreatorId(),
+                                                curQuote->getId(),
+                                                quoteRatingBuffer);
     
     return DatabaseContext::DatabaseOperationResult::DOR_SUCCESS;
 }
@@ -300,7 +325,7 @@ DatabaseContext::DatabaseOperationResult DatabaseFacadeStandard::getQuoteById(co
 DatabaseContext::DatabaseOperationResult DatabaseFacadeStandard::getQuotesCount(CoreContext::Id &quotesCount)
 {
     std::unique_ptr<DatabaseQueryBase> selectQuoteQuery{std::make_unique<DatabaseQueryStandardSelect>(QStringList{EntityQuote::C_QUOTE_TABLE_NAME},
-                                                                                                      QStringList{QString{"MAX("} + EntityQuote::C_ID_PROP_NAME + ")"},
+                                                                                                      QStringList{QString{"MAX("} + EntityQuote::C_ID_PROP_NAME + ") AS " + EntityQuote::C_ID_PROP_NAME},
                                                                                                       DatabaseQueryStandardSelect::ConditionsList{})};
     std::vector<std::shared_ptr<DatabaseQueryResultBase>> selectQuoteResults{};
     
@@ -373,21 +398,21 @@ DatabaseContext::DatabaseOperationResult DatabaseFacadeStandard::createGradeForQ
     if ((selectingGradeOperationResult = getGradeByQuoteIdAndDeviceHash(gradeData->getQuoteId(), gradeData->getDeviceHash(), selectedGrade)) != DatabaseContext::DatabaseOperationResult::DOR_SUCCESS)
         return selectingGradeOperationResult;
     
-    QStringList                             updateAttributes{EntityQuote::C_RATING_PROP_NAME};
-    DatabaseQueryStandardUpdate::ValuesList updateValues    {selectedQuote->getRating() + gradeData->getGrade()};
-    auto                                    updateCondition = std::make_shared<DatabaseQueryConditionStandard>(DatabaseQueryContextStandard::DatabaseQueryConditionType::DQCT_EQUAL_TO,
-                                                                                                               EntityGrade::C_QUOTE_ID_PROP_NAME,
-                                                                                                               gradeData->getQuoteId());
+//    QStringList                             updateAttributes{EntityQuote::C_RATING_PROP_NAME};
+//    DatabaseQueryStandardUpdate::ValuesList updateValues    {selectedQuote->getRating() + gradeData->getGrade()};
+//    auto                                    updateCondition = std::make_shared<DatabaseQueryConditionStandard>(DatabaseQueryContextStandard::DatabaseQueryConditionType::DQCT_EQUAL_TO,
+//                                                                                                               EntityQuote::C_ID_PROP_NAME,
+//                                                                                                               gradeData->getQuoteId());
     
-    std::unique_ptr<DatabaseQueryBase> updateQuoteRatingQuery{std::make_unique<DatabaseQueryStandardUpdate>(QStringList{EntityQuote::C_QUOTE_TABLE_NAME},
-                                                                                                            updateAttributes,
-                                                                                                            updateValues,
-                                                                                                            DatabaseQueryStandardUpdate::ConditionsList{updateCondition})};
+//    std::unique_ptr<DatabaseQueryBase> updateQuoteRatingQuery{std::make_unique<DatabaseQueryStandardUpdate>(QStringList{EntityQuote::C_QUOTE_TABLE_NAME},
+//                                                                                                            updateAttributes,
+//                                                                                                            updateValues,
+//                                                                                                            DatabaseQueryStandardUpdate::ConditionsList{updateCondition})};
     
-    std::vector<std::shared_ptr<DatabaseQueryResultBase>> updateResults{};
+//    std::vector<std::shared_ptr<DatabaseQueryResultBase>> updateResults{};
     
-    if (!m_driver->executeQuery(updateQuoteRatingQuery, updateResults))
-        return DatabaseContext::DatabaseOperationResult::DOR_ERROR;
+//    if (!m_driver->executeQuery(updateQuoteRatingQuery, updateResults))
+//        return DatabaseContext::DatabaseOperationResult::DOR_ERROR;
     
     createdGrade = std::move(selectedGrade);
     
@@ -506,6 +531,8 @@ DatabaseContext::DatabaseOperationResult DatabaseFacadeStandard::getQueryResultP
     
     if (!(propValueBuffer = sqlResult.value(propName)).isValid())
         return DatabaseContext::DatabaseOperationResult::DOR_ERROR;
+    if (propValueBuffer.isNull())
+        return DatabaseContext::DatabaseOperationResult::DOR_NOT_FOUND;
     
     propValue = std::move(propValueBuffer);
     

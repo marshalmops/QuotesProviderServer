@@ -37,7 +37,7 @@ bool DatabaseLayerCreator::createDatabaseFacade(const QString &connectionName,
         
         std::unique_ptr entityProcessor{std::make_unique<DatabaseEntityProcessorSQL>()};
         
-        databaseFacade = std::make_unique<DatabaseFacadeStandard>(std::move(driver), std::move(entityProcessor));
+        databaseFacade = std::make_unique<DatabaseFacadeSQLite>(std::move(driver), std::move(entityProcessor));
     
         break;
     }

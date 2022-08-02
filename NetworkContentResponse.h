@@ -10,7 +10,8 @@ public:
         RPC_INVALID = 0,
         RPC_NOT_FOUND,
         RPC_ALREADY_EXISTS,
-        RPC_OK
+        RPC_OK,
+        RPC_INCORRECT_DATA
     };
     
     NetworkContentResponse() = delete;

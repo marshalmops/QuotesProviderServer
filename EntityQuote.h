@@ -16,9 +16,9 @@ public:
     constexpr static const char* C_TEXT_PROP_NAME               = "text";
     constexpr static const char* C_TEXT_HASH_PROP_NAME          = "text_hash";
     constexpr static const char* C_AUTHOR_PROP_NAME             = "author";
-    constexpr static const char* C_RATING_PROP_NAME             = "rating";
     constexpr static const char* C_CREATOR_ID_PROP_NAME         = "creator_id";
     constexpr static const char* C_CREATION_DATE_TIME_PROP_NAME = "creation_date_time";
+    constexpr static const char* C_RATING                       = "rating";
     
     EntityQuote(const QString &text = QString{},
                 const QString &author = QString{},
@@ -34,9 +34,9 @@ public:
     const QString&           getText            () const;
     const CoreContext::Hash& getTextHash        () const;
     const QString&           getAuthor          () const;
-    Rating                   getRating          () const;
     CoreContext::Id          getCreatorId       () const;
     const QDateTime&         getCreationDateTime() const;
+    Rating                   getRating          () const;
     
     virtual bool isValid() const override;
     
@@ -45,10 +45,9 @@ private:
     QString           m_text;
     CoreContext::Hash m_textHash;
     QString           m_author;
-    Rating            m_rating;
     CoreContext::Id   m_creatorId;
     QDateTime         m_creationDateTime;
-    
+    Rating            m_rating;
 };
 
 #endif // ENTITYQUOTE_H

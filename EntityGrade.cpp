@@ -30,6 +30,8 @@ CoreContext::QuoteGrade EntityGrade::getGrade() const
 bool EntityGrade::isValid() const
 {
     return (!m_deviceHash.isEmpty()
+          && m_grade >  CoreContext::QuoteGrade::QG_LOW_BORDER
           && m_grade != CoreContext::QuoteGrade::QG_INVALID
+          && m_grade <  CoreContext::QuoteGrade::QG_HIGH_BORDER
           && EntityBase::isValid());
 }

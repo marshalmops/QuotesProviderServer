@@ -101,7 +101,7 @@ bool DatabaseQueryParserStandard::parseInsertQuery(const DatabaseQueryStandardIn
     auto valuesCount = query->getValues().size();
     
     for (auto i = 0; i < valuesCount; ++i) {
-        QString valueString{variantValueToString(query->getValues().at(i))};
+        QString valueString{DatabaseQueryContextStandard::variantValueToString(query->getValues().at(i))};
         
         if (valueString.isEmpty()) 
             return false;
@@ -124,18 +124,24 @@ bool DatabaseQueryParserStandard::parseUpdateQuery(const DatabaseQueryStandardUp
     QString sqlString{};
     
     sqlString += "UPDATE ";
-    sqlString += query->getTables().front() + " ";
-    sqlString += "SET";
+    
+    auto tablesCount = query->getTables().length();
+    
+    for (auto i = 0; i < tablesCount; ++i) {
+        sqlString += (query->getTables().at(i) + (i + 1 == tablesCount ? ' ' : ','));
+    }
+    
+    sqlString += "SET ";
     
     auto attributesCount = query->getAttributes().length();
     
     for (auto i = 0; i < attributesCount; ++i) {
-        QString valueString{variantValueToString(query->getValues().at(i))};
+        QString valueString{DatabaseQueryContextStandard::variantValueToString(query->getValues().at(i))};
         
         if (valueString.isEmpty()) 
             return false;
         
-        sqlString += (query->getAttributes().at(i) + " = " + valueString + (i + 1 == attributesCount ? ") " : ","));
+        sqlString += (query->getAttributes().at(i) + " = " + valueString + (i + 1 == attributesCount ? ' ' : ','));
     }
     
     if (!query->getConditions().empty()) {
@@ -183,26 +189,6 @@ QString DatabaseQueryParserStandard::orderFlagToString(const DatabaseQueryContex
     switch (orderFlag) {
     case DatabaseQueryContextStandard::OrderFlag::OF_ASC:  return "ASC";
     case DatabaseQueryContextStandard::OrderFlag::OF_DESC: return "DESC";
-    }
-    
-    return QString{};
-}
-
-QString DatabaseQueryParserStandard::variantValueToString(const QVariant &value) const
-{
-    if (value.isNull()) return QString{};
-    
-    switch (value.type()) {
-    case QVariant::Type::Char:
-    case QVariant::Type::String:   {return (QString{'\''} + value.toString() + '\'');};
-    case QVariant::Type::Bool:
-    case QVariant::Type::LongLong:
-    case QVariant::Type::ULongLong:
-    case QVariant::Type::Int:
-    case QVariant::Type::UInt:
-    case QVariant::Type::Double:   {return value.toString();};
-    case QVariant::Type::DateTime: {return QString{'\''} + value.toDateTime().toString(Qt::ISODate) + '\'';};
-    case QVariant::Type::Date:     {return QString{'\''} + value.toDate().toString(Qt::ISODate) + '\'';};
     }
     
     return QString{};

@@ -1,37 +1,27 @@
 #include "NetworkHttpPacketProcessor.h"
 
-bool NetworkHttpPacketProcessor::createRequestByHttpData(const ServerContext::HttpRequest * const httpRequest,
-                                                         NetworkContentRequest * const request)
+NetworkHttpPacketProcessor::PacketProcessingResult NetworkHttpPacketProcessor::createRequestByHttpData(const ServerContext::HttpRequest * const httpRequest,
+                                                                                                       NetworkContentRequest * const request)
 {
-    if (!httpRequest) return false;
-    
-//    boost::beast::http::parser<true, boost::beast::http::string_body> parser{};
-//    boost::system::error_code err{};
-    
-//    parser.put(boost::asio::buffer(rawData), err);
-    
-//    if (err) 
-//        return false;
-    
-//    auto parsedData = parser.get();
+    if (!httpRequest) return PacketProcessingResult::PPR_FAIL;
     
     if (httpRequest->method() != boost::beast::http::verb::post)
-        return false;
+        return PacketProcessingResult::PPR_INCORRECT_DATA;
     
     auto endpointPath = httpRequest->base().target();
 
     if (endpointPath.empty())
-        return false;
+        return PacketProcessingResult::PPR_INCORRECT_DATA;
     
     QString                  endpointString{QString{endpointPath.to_string().c_str()}.mid(1)};
     ServerContext::Endpoints endpointId    {ServerContext::getEndpointIdByStringHash(endpointString)};
     
     if (endpointId == ServerContext::Endpoints::E_INVALID)
-        return false;
+        return PacketProcessingResult::PPR_INCORRECT_DATA;
     
     auto rawJsonBody = httpRequest->body().data();
    
-    return request->fromRequestBase(endpointId, rawJsonBody);
+    return (request->fromRequestBase(endpointId, rawJsonBody) ? PacketProcessingResult::PPR_SUCCESS : PacketProcessingResult::PPR_FAIL);
 }
 
 bool NetworkHttpPacketProcessor::createHttpResponseWithContent(const std::unique_ptr<NetworkContentResponse> &response, 
@@ -56,36 +46,12 @@ bool NetworkHttpPacketProcessor::createHttpResponseWithContent(const std::unique
         httpResponse->body() = jsonBodyDoc.toJson().data();
     }
     
-//    std::string responseJsonData{};
-    
-//    response.toRawData(responseJsonData);
-    
-//    std::string httpResponseBuffer{};
-//    std::ostringstream httpResponseBufferStream{httpResponseBuffer};
-    
-//    std::string resultCodeString{};
-    
-//    if (!responseProcessingCodeToHttpCodeString(response.getResponseProcessingCode(), resultCodeString))
-//        return false;
-    
-//    std::string contentTypeString{};
-    
-//    if (!responseToHttpContentType(response, contentTypeString))
-//        return false;
-    
-//    // creating http response char*...
-    
-//    httpResponseBufferStream << "HTTP/1.1 " << resultCodeString << std::endl;
-//    httpResponseBufferStream << "content-type: " << contentTypeString << std::endl;
-//    httpResponseBufferStream << "content-length: " << responseJsonData.length() << std::endl;
-//    httpResponseBufferStream << std::endl;
-//    httpResponseBufferStream << responseJsonData;
-    
-//    if (httpResponseBuffer.empty()) return false;
-    
-//    httpResponse = std::move(httpResponseBuffer);
-    
     return true;
+}
+
+std::unique_ptr<ServerContext::HttpResponse> NetworkHttpPacketProcessor::createHttpResponseForBadRequest()
+{
+    return std::make_unique<ServerContext::HttpResponse>(boost::beast::http::status::bad_request, ServerContext::C_HTTP_VERSION);
 }
 
 bool NetworkHttpPacketProcessor::responseProcessingCodeToHttpCode(const NetworkContentResponse::ResponseProcessingCode code, 
@@ -96,7 +62,8 @@ bool NetworkHttpPacketProcessor::responseProcessingCodeToHttpCode(const NetworkC
     static const std::unordered_map<NetworkContentResponse::ResponseProcessingCode, boost::beast::http::status> responseCodeHttpCodeHash = {
         {NetworkContentResponse::ResponseProcessingCode::RPC_NOT_FOUND,      boost::beast::http::status::not_found},
         {NetworkContentResponse::ResponseProcessingCode::RPC_OK,             boost::beast::http::status::ok},
-        {NetworkContentResponse::ResponseProcessingCode::RPC_ALREADY_EXISTS, boost::beast::http::status::conflict}
+        {NetworkContentResponse::ResponseProcessingCode::RPC_ALREADY_EXISTS, boost::beast::http::status::conflict},
+        {NetworkContentResponse::ResponseProcessingCode::RPC_INCORRECT_DATA, boost::beast::http::status::bad_request}
     };
     
     if (responseCodeHttpCodeHash.find(code) == responseCodeHttpCodeHash.end()) return false;

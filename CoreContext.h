@@ -36,9 +36,11 @@ enum EntityType : uint8_t {
 };
 
 enum QuoteGrade : int8_t {
-    QG_LIKE = -1,
+    QG_LOW_BORDER = - 2,
+    QG_DISLIKE = -1,
     QG_INVALID = 0,
-    QG_DISLIKE = 1
+    QG_LIKE = 1,
+    QG_HIGH_BORDER
 };
 
 static const QVector<std::pair<QString, QCryptographicHash::Algorithm>> stringHashingAlgoVector = {

@@ -2,6 +2,9 @@
 #define DATABASEQUERYCONTEXTSTANDARD_H
 
 #include <stdint.h>
+#include <QVariant>
+#include <QDate>
+#include <QDateTime>
 
 #include "DatabaseContext.h"
 
@@ -27,6 +30,26 @@ enum OrderFlag : uint8_t {
     OF_ASC,
     OF_DESC
 };
+
+inline QString variantValueToString(const QVariant &value)
+{
+    if (value.isNull()) return QString{};
+    
+    switch (value.type()) {
+    case QVariant::Type::Char:
+    case QVariant::Type::String:   {return (QString{'\''} + value.toString() + '\'');};
+    case QVariant::Type::Bool:
+    case QVariant::Type::LongLong:
+    case QVariant::Type::ULongLong:
+    case QVariant::Type::Int:
+    case QVariant::Type::UInt:
+    case QVariant::Type::Double:   {return value.toString();};
+    case QVariant::Type::DateTime: {return QString{'\''} + value.toDateTime().toString(Qt::ISODate) + '\'';};
+    case QVariant::Type::Date:     {return QString{'\''} + value.toDate().toString(Qt::ISODate) + '\'';};
+    }
+    
+    return QString{};
+}
 
 };
 

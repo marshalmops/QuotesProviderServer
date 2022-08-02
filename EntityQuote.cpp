@@ -12,9 +12,9 @@ EntityQuote::EntityQuote(const QString &text,
       m_text{text},
       m_textHash{textHash},
       m_author{author},
-      m_rating{rating},
       m_creatorId{creatorId},
-      m_creationDateTime{creationDateTime}
+      m_creationDateTime{creationDateTime},
+      m_rating{rating}
 {
     
 }
@@ -26,9 +26,9 @@ EntityQuote::EntityQuote(const EntityQuote &quote)
     m_text             = quote.m_text;
     m_textHash         = quote.m_textHash;
     m_author           = quote.m_author;
-    m_rating           = quote.m_rating;
     m_creatorId        = quote.m_creatorId;
     m_creationDateTime = quote.m_creationDateTime;
+    m_rating           = quote.m_rating;
 }
 
 EntityQuote &EntityQuote::operator=(EntityQuote &&quote)
@@ -38,9 +38,11 @@ EntityQuote &EntityQuote::operator=(EntityQuote &&quote)
     m_text             = std::move(quote.m_text);
     m_textHash         = std::move(quote.m_textHash);
     m_author           = std::move(quote.m_author);
-    m_rating           = quote.m_rating;
     m_creatorId        = quote.m_creatorId;
     m_creationDateTime = std::move(quote.m_creationDateTime);
+    m_rating           = quote.m_rating;
+    
+    return *this;
 }
 
 CoreContext::Id EntityQuote::getId() const
@@ -63,11 +65,6 @@ const QString &EntityQuote::getAuthor() const
     return m_author;
 }
 
-EntityQuote::Rating EntityQuote::getRating() const
-{
-    return m_rating;
-}
-
 CoreContext::Id EntityQuote::getCreatorId() const
 {
     return m_creatorId;
@@ -76,6 +73,11 @@ CoreContext::Id EntityQuote::getCreatorId() const
 const QDateTime &EntityQuote::getCreationDateTime() const
 {
     return m_creationDateTime;
+}
+
+EntityQuote::Rating EntityQuote::getRating() const
+{
+    return m_rating;
 }
 
 bool EntityQuote::isValid() const

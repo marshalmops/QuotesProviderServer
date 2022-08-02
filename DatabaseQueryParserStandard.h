@@ -34,7 +34,6 @@ protected:
                                   std::unique_ptr<DatabaseQueryParserResultInterface> &result);
     
     QString orderFlagToString     (const DatabaseQueryContextStandard::OrderFlag orderFlag) const;
-    QString variantValueToString  (const QVariant &value) const;
     QString conditionsListToString(const DatabaseQueryUsingCondition::ConditionsList &conditions) const;
 };
 

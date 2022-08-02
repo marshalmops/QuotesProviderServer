@@ -3,11 +3,10 @@
 namespace {
 
 CoreContext::Id getRandomId(const CoreContext::Id max) {
-    std::random_device dev;
-    std::mt19937 rng(dev());
+    std::mt19937_64 rng(std::chrono::steady_clock::now().time_since_epoch().count());
     
     std::uniform_int_distribution<std::mt19937::result_type> dist(1, max);
-    
+
     return dist(rng);
 }
 
@@ -32,9 +31,13 @@ bool getSessionTokenByJson(const QJsonObject &json,
 CoreContext::Hash getClearTextHash(const QString &text) {
     QString preparedText{text.toLower()};
     
-    preparedText = preparedText.remove(QRegExp{"[^A-Za-zА-Яа-я]"});
+    preparedText = preparedText.remove(QRegExp{"[^A-Za-zА-Яа-я0-9]"});
     
-    return QString::fromUtf8(QCryptographicHash::hash(preparedText.toUtf8(), CoreContext::C_DEFAULT_TEXT_HASHING_ALGO));
+    CoreContext::Hash hash{};
+    
+    HashingGenerator::generateHash(preparedText, hash, CoreContext::C_DEFAULT_TEXT_HASHING_ALGO);
+    
+    return hash;
 }
 
 }
@@ -160,8 +163,11 @@ bool MainCoreWorker::processSignIn(const std::shared_ptr<NetworkContentRequest> 
 {
     std::unique_ptr<EntityBase> userSignInData{nullptr};
     
-    if (!m_entitiesProcessor->jsonToEntity(CoreContext::EntityType::ET_USER, request->getJsonBody(), userSignInData))
-        return false;
+    if (!m_entitiesProcessor->jsonToEntity(CoreContext::EntityType::ET_USER, request->getJsonBody(), userSignInData)) {
+        sendResponseByNetworkProcessingCode(NetworkContentResponse::ResponseProcessingCode::RPC_INCORRECT_DATA, request);
+        
+        return true;
+    } 
     
     std::unique_ptr<EntityUser> userData{dynamic_cast<EntityUser*>(userSignInData.release())};
     
@@ -172,7 +178,7 @@ bool MainCoreWorker::processSignIn(const std::shared_ptr<NetworkContentRequest> 
     QString dataForHashing {userData->getEmail() + QDateTime::currentDateTime().toString()};
     QString newSessionToken{};
     
-    if (!SessionTokenGenerator::generateSessionToken(dataForHashing, coreSettings->getHashingSalt(), newSessionToken, coreSettings->getHashingAlgo()))
+    if (!HashingGenerator::generateToken(dataForHashing, coreSettings->getHashingSalt(), newSessionToken, coreSettings->getHashingAlgo()))
         return false;
     
     QDateTime curDateTime{QDateTime::currentDateTime()};
@@ -206,8 +212,11 @@ bool MainCoreWorker::processQuoteCreation(const std::shared_ptr<NetworkContentRe
     
     std::unique_ptr<EntityBase> quoteDataBase{};
     
-    if (!m_entitiesProcessor->jsonToEntity(CoreContext::EntityType::ET_QUOTE, jsonBody, quoteDataBase))
-        return false;
+    if (!m_entitiesProcessor->jsonToEntity(CoreContext::EntityType::ET_QUOTE, jsonBody, quoteDataBase)) {
+        sendResponseByNetworkProcessingCode(NetworkContentResponse::ResponseProcessingCode::RPC_INCORRECT_DATA, request);
+        
+        return true;
+    }
     
     std::unique_ptr<EntityQuote> quoteDataRaw{dynamic_cast<EntityQuote*>(quoteDataBase.release())};
     
@@ -221,8 +230,11 @@ bool MainCoreWorker::processQuoteCreation(const std::shared_ptr<NetworkContentRe
     
     CoreContext::Hash sessionToken{};
     
-    if (!getSessionTokenByJson(jsonBody, sessionToken))
-        return false;
+    if (!getSessionTokenByJson(jsonBody, sessionToken)) {
+        sendResponseByNetworkProcessingCode(NetworkContentResponse::ResponseProcessingCode::RPC_INCORRECT_DATA, request);
+        
+        return true;
+    }
     
     std::unique_ptr<EntitySession> session{};
     
@@ -264,8 +276,11 @@ bool MainCoreWorker::processGradeForQuote(const std::shared_ptr<NetworkContentRe
 {
     std::unique_ptr<EntityBase> gradeDataBase{};
     
-    if (!m_entitiesProcessor->jsonToEntity(CoreContext::EntityType::ET_GRADE, request->getJsonBody(), gradeDataBase))
-        return false;
+    if (!m_entitiesProcessor->jsonToEntity(CoreContext::EntityType::ET_GRADE, request->getJsonBody(), gradeDataBase)) {
+        sendResponseByNetworkProcessingCode(NetworkContentResponse::ResponseProcessingCode::RPC_INCORRECT_DATA, request);
+        
+        return true;
+    }
     
     std::unique_ptr<EntityGrade> gradeData{dynamic_cast<EntityGrade*>(gradeDataBase.release())};
     
@@ -343,6 +358,8 @@ bool MainCoreWorker::generateTimeRelatedQuoteGettingResponse(const std::shared_p
     }
     
     if (!curTimeRelatedQuote.get()) return false;
+    if (!curTimeRelatedQuote->isValid()) 
+        return processNoTimeRelatedQuotesCase(request, response);
     
     QJsonObject quoteJson{};
     
@@ -440,10 +457,17 @@ void MainCoreWorker::sendResponseByOperationCode(const DatabaseContext::Database
     case DatabaseContext::DatabaseOperationResult::DOR_ALREADY_EXISTS: {networkCode = NetworkContentResponse::ResponseProcessingCode::RPC_ALREADY_EXISTS; break;}
     }
     
-    response = std::make_shared<NetworkContentResponse>(request->getWorkerId(),
-                                                        request->getSocketId(),
-                                                        networkCode,
-                                                        jsonBody);
+    sendResponseByNetworkProcessingCode(networkCode, request, jsonBody);
+}
+
+void MainCoreWorker::sendResponseByNetworkProcessingCode(const NetworkContentResponse::ResponseProcessingCode result, 
+                                                         const std::shared_ptr<NetworkContentRequest> &request,
+                                                         const QJsonObject &jsonBody)
+{
+    std::shared_ptr<NetworkContentResponse> response = std::make_shared<NetworkContentResponse>(request->getWorkerId(),
+                                                                                                request->getSocketId(),
+                                                                                                result,
+                                                                                                jsonBody);
     
     emit requestProcessed(response);
 }

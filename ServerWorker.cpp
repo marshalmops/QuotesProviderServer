@@ -38,47 +38,42 @@ void ServerWorker::start()
         
         std::unique_ptr response = m_responsesQueue.takeItem();
         
-        if (!response.get()) continue;
-        
-        std::unique_ptr<ServerContext::HttpResponse> httpResponse{};
-        
-        if (!m_httpPacketProcessor->createHttpResponseWithContent(response, httpResponse)) {
-            emit errorOccured(Error{tr("Http response creating error!").toStdString(), true});
+        if (response.get()) {
+            std::unique_ptr<ServerContext::HttpResponse> httpResponse{};
             
-            return;
-        }
-        
-        SlotArrayItem<ServerConnection> *socketSlotArrayItemPtr{nullptr};
-        
-        if (!(socketSlotArrayItemPtr = m_connections.getItem(response->getSocketId()))) {
-            emit errorOccured(Error{tr("Requested socket doesn't exist!").toStdString(), true});
+            if (!m_httpPacketProcessor->createHttpResponseWithContent(response, httpResponse)) {
+                emit errorOccured(Error{tr("Http response creating error!").toStdString(), true});
+                
+                return;
+            }
             
-            return;
-        }
-        
-        Error err{};
+            SlotArrayItem<ServerConnection> *socketSlotArrayItemPtr{nullptr};
             
-        if ((err = socketSlotArrayItemPtr->getValue().writeData(httpResponse)).isValid()) {
-            emit errorOccured(err);
+            if (!(socketSlotArrayItemPtr = m_connections.getItem(response->getSocketId()))) {
+                emit errorOccured(Error{tr("Requested socket doesn't exist!").toStdString(), true});
+                
+                return;
+            }
             
-            return;
-        }
-        
-        if (!m_connections.eraseItem(socketSlotArrayItemPtr->getIndex())) {
-            emit errorOccured(Error{tr("Responded socket deleting error!").toStdString(), true});
+            Error err{};
             
-            return;
+            if ((err = socketSlotArrayItemPtr->getValue().writeData(httpResponse)).isValid()) {
+                emit errorOccured(err);
+                
+                return;
+            }
+            
+            if (!m_connections.eraseItem(socketSlotArrayItemPtr->getIndex())) {
+                emit errorOccured(Error{tr("Responded socket deleting error!").toStdString(), true});
+                
+                return;
+            }
         }
         
         if (!m_isAcceptingOnQueue.test_and_set())
             acceptConnectionAsync();
     }
 }
-
-//void ServerWorker::stop()
-//{
-//    m_runningFlag.store(false, std::memory_order_release);
-//}
 
 void ServerWorker::acceptConnectionAsync()
 {
@@ -111,13 +106,32 @@ void ServerWorker::acceptConnectionAsync()
         
         std::shared_ptr<NetworkContentRequest> newRequest = std::make_shared<NetworkContentRequest>(m_workerId, newConnectionPtr->getIndex());
         
-        if (!m_httpPacketProcessor->createRequestByHttpData(readHttpRequest.get(), newRequest.get())) {
+        NetworkHttpPacketProcessor::PacketProcessingResult requestCreationResult{m_httpPacketProcessor->createRequestByHttpData(readHttpRequest.get(), newRequest.get())};
+        
+        if (requestCreationResult == NetworkHttpPacketProcessor::PacketProcessingResult::PPR_FAIL) {
             emit errorOccured(Error{"New connection allocation error!", true});                
             
             return;
+            
+        } else if (requestCreationResult == NetworkHttpPacketProcessor::PacketProcessingResult::PPR_SUCCESS) {
+            emit requestOccured(newRequest);
+            
         }
-        
-        emit requestOccured(newRequest);
+        else {
+            Error err{};
+                
+            if ((err = newConnectionPtr->getValue().writeData(m_httpPacketProcessor->createHttpResponseForBadRequest())).isValid()) {
+                emit errorOccured(err);
+                
+                return;
+            }
+            
+            if (!m_connections.eraseItem(newConnectionPtr->getIndex())) {
+                emit errorOccured(Error{"New incorrect connection erasing error!", true});                
+                
+                return;
+            }
+        }
         
         retryAcceptConnection();
     });
@@ -151,8 +165,3 @@ void ServerWorker::stop()
             
     emit stopped();
 }
-
-//ServerContext::SocketId ServerWorker::addNewConnection(ServerConnection &&connection)
-//{
-    
-//}

@@ -18,7 +18,6 @@ public:
                            std::unique_ptr<DatabaseEntityProcessorSQL> &&entityProcessor);
     
     virtual bool testDatabaseCorrectness() override;
-    virtual bool initializeTables       () override;
     
     virtual DatabaseContext::DatabaseOperationResult createUserSession  (const std::unique_ptr<EntityUser> &userData,
                                                                          const std::unique_ptr<EntitySession> &sessionData,
