@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QObject>
 #include <QTextEdit>
+#include <QScrollBar>
 
 #include "Error.h"
 

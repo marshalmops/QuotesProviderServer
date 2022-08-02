@@ -71,9 +71,14 @@ SettingsEditor::SettingsEditor(QWidget *parent)
     coreSettingsLayout->addLayout(coreSettingsLabelsLayout);
     coreSettingsLayout->addLayout(coreSettingsInputsLayout);
     
+    QVBoxLayout *mainCoreSettingsLayout = new QVBoxLayout{};
+    
+    mainCoreSettingsLayout->addLayout(coreSettingsLayout);
+    mainCoreSettingsLayout->addStretch(1);
+    
     QWidget *coreSettingsTabWidget = new QWidget{};
     
-    coreSettingsTabWidget->setLayout(coreSettingsLayout);
+    coreSettingsTabWidget->setLayout(mainCoreSettingsLayout);
     
     // db settings:
     

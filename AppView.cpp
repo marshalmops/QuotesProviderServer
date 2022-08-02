@@ -7,7 +7,7 @@ AppView::AppView(QWidget *parent)
     
     m_logTextEdit = new QTextEdit{};
     
-    m_logTextEdit->setEnabled(false);
+    m_logTextEdit->setTextInteractionFlags(Qt::TextBrowserInteraction);
     
     QVBoxLayout *logLayout = new QVBoxLayout{};
     
